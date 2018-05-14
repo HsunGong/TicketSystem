@@ -19,9 +19,9 @@
 <div class="mask"></div>
 <div style="height: 55px; width: 100%;"></div>
 <div class="topnav" id="myTopnav">
-  <a href="#home" class="active"><i class="material-icons" style="position: relative; top: 6px;">home</i>首页</a>
-  <a href="#search"><i class="material-icons" style="position: relative; top: 6px;">search</i>查询/购票</a>
-  <a href="#login" style="float: right" id="user_button"><i class="material-icons" style="position: relative; top: 6px;">person</i>登录/注册</a>
+  <a href="#home" class="active"><i class="material-icons" style="position: relative; top: 6px;">home</i></a>
+  <a href="#search"><i class="material-icons" style="position: relative; top: 6px;">search</i></a>
+  <a href="#login" style="float: right" id="user_button"><i class="material-icons" style="position: relative; top: 6px;">person</i><span id="user_name"></span></a>
   <a href="javascript:void(0);" class="icon" onclick="myFunction()">
     <i class="fa fa-bars"></i>
   </a>
@@ -48,7 +48,246 @@
 	<div class="register_button" id="register_button">注册</div>
   </div>
 </div>
-
+<div class="w3-card" style="width: 80%; margin-left: auto; margin-right: auto; margin-bottom: 7px" >
+  <div class="ticket_info" >
+    <div class="time_used_info"></div>
+    <div class="train_id_info">
+      <div class="train_id">D</div>
+      <div class="train_id_2">D134</div>
+    </div>
+    <div class="time_info">
+      <div class="starting_station">
+        <time>06:00</time>
+        <div class="station_name">始 上海虹桥</div>
+      </div>
+      <div class="link_symbol">&rarr;</div>
+      <div class="ending_station">
+        <time>08:00</time>
+        <div class="station_name"> 余姚北 </div>
+      </div>
+    </div>
+    <div class="seat_contain">
+      <div class="seat_contain_text">
+        <div class="buy_text_1">最低价</div>
+        <div class="buy_text_2"> <span class="buy_text_2_1">￥</span><span class="buy_text_2_2">124</span></div>
+        <div class="buy_text_3"></div>
+      </div>
+    </div>
+    <div class="ver_line"></div>
+    <div class="seat_contain_list">
+      <div class="seat_contain">
+        <div class="seat_contain_text available">
+          <div class="buy_text_1">无座</div>
+          <div class="buy_text_2"> <span class="buy_text_2_1">￥</span> <span class="buy_text_2_2">124</span></div>
+          <div class="buy_text_3"></div>
+        </div>
+        <div class="buy_option">
+          <center>
+            <button class="w3-button buy_text_4">购买</button>
+            <br>
+            <input class="w3-input w3-hover-gray buy_text_5" type="tel" value="1" min="1" max="10" style="width:60%; border-style: none">
+            <hr style="width: 30%; position: relative;  top: -18px;">
+            <button type="button" class="buy_text_6">&#60;</button>
+          </center>
+        </div>
+      </div>
+      <div class="seat_contain">
+        <div class="seat_contain_text available">
+          <div class="buy_text_1">二等座</div>
+          <div class="buy_text_2"> <span class="buy_text_2_1">￥</span> <span class="buy_text_2_2">124</span></div>
+          <div class="buy_text_3">余3张</div>
+        </div>
+        <div class="buy_option">
+          <center>
+            <button class="w3-button buy_text_4">购买</button>
+            <br>
+            <input class="w3-input w3-hover-gray buy_text_5" type="tel" value="1" min="1" max="10" style="width:60%; border-style: none">
+            <hr style="width: 30%; position: relative;  top: -18px;">
+            <button type="button" class="buy_text_6">&#60;</button>
+          </center>
+        </div>
+      </div>
+      <div class="seat_contain">
+        <div class="seat_contain_text available">
+          <div class="buy_text_1">一等座</div>
+          <div class="buy_text_2"> <span class="buy_text_2_1">￥</span> <span class="buy_text_2_2">233</span></div>
+          <div class="buy_text_3"></div>
+        </div>
+        <div class="buy_option">
+          <center>
+            <button class="w3-button buy_text_4">购买</button>
+            <br>
+            <input class="w3-input w3-hover-gray buy_text_5" type="tel" value="1" min="1" max="10" style="width:60%; border-style: none">
+            <hr style="width: 30%; position: relative;  top: -18px;">
+            <button type="button" class="buy_text_6">&#60;</button>
+          </center>
+        </div>
+      </div>
+      <div class="seat_contain">
+        <div class="seat_contain_text">
+          <div class="buy_text_1">商务/特等</div>
+          <div class="buy_text_2"> <span class="buy_text_2_1"></span> <span class="buy_text_2_2">--</span></div>
+          <div class="buy_text_3"></div>
+        </div>
+        <div class="buy_option">
+          <center>
+            <button class="w3-button buy_text_4">购买</button>
+            <br>
+            <input class="w3-input w3-hover-gray buy_text_5" type="tel" value="1" min="1" max="10" style="width:60%; border-style: none">
+            <hr style="width: 30%; position: relative;  top: -18px;">
+            <button type="button" class="buy_text_6">&#60;</button>
+          </center>
+        </div>
+      </div>
+      <div class="seat_contain">
+        <div class="seat_contain_text">
+          <div class="buy_text_1">动卧</div>
+          <div class="buy_text_2"> <span class="buy_text_2_1"></span> <span class="buy_text_2_2">--</span></div>
+          <div class="buy_text_3"></div>
+        </div>
+        <div class="buy_option">
+          <center>
+            <button class="w3-button buy_text_4">购买</button>
+            <br>
+            <input class="w3-input w3-hover-gray buy_text_5" type="tel" value="1" min="1" max="10" style="width:60%; border-style: none">
+            <hr style="width: 30%; position: relative;  top: -18px;">
+            <button type="button" class="buy_text_6">&#60;</button>
+          </center>
+        </div>
+      </div>
+      <div class="seat_contain">
+        <div class="seat_contain_text">
+          <div class="buy_text_1">软卧</div>
+          <div class="buy_text_2"> <span class="buy_text_2_1"></span> <span class="buy_text_2_2">--</span></div>
+          <div class="buy_text_3"></div>
+        </div>
+        <div class="buy_option">
+          <center>
+            <button class="w3-button buy_text_4">购买</button>
+            <br>
+            <input class="w3-input w3-hover-gray buy_text_5" type="tel" value="1" min="1" max="10" style="width:60%; border-style: none">
+            <hr style="width: 30%; position: relative;  top: -18px;">
+            <button type="button" class="buy_text_6">&#60;</button>
+          </center>
+        </div>
+      </div>
+      <div class="seat_contain">
+        <div class="seat_contain_text">
+          <div class="buy_text_1">硬卧</div>
+          <div class="buy_text_2"> <span class="buy_text_2_1"></span> <span class="buy_text_2_2">--</span></div>
+          <div class="buy_text_3"></div>
+        </div>
+        <div class="buy_option">
+          <center>
+            <button class="w3-button buy_text_4">购买</button>
+            <br>
+            <input class="w3-input w3-hover-gray buy_text_5" type="tel" value="1" min="1" max="10" style="width:60%; border-style: none">
+            <hr style="width: 30%; position: relative;  top: -18px;">
+            <button type="button" class="buy_text_6">&#60;</button>
+          </center>
+        </div>
+      </div>
+      <div class="seat_contain">
+        <div class="seat_contain_text">
+          <div class="buy_text_1">软座</div>
+          <div class="buy_text_2"> <span class="buy_text_2_1"></span> <span class="buy_text_2_2">--</span></div>
+          <div class="buy_text_3"></div>
+        </div>
+        <div class="buy_option">
+          <center>
+            <button class="w3-button buy_text_4">购买</button>
+            <br>
+            <input class="w3-input w3-hover-gray buy_text_5" type="tel" value="1" min="1" max="10" style="width:60%; border-style: none">
+            <hr style="width: 30%; position: relative;  top: -18px;">
+            <button type="button" class="buy_text_6">&#60;</button>
+          </center>
+        </div>
+      </div>
+      <div class="seat_contain">
+        <div class="seat_contain_text">
+          <div class="buy_text_1">硬座</div>
+          <div class="buy_text_2"> <span class="buy_text_2_1"></span> <span class="buy_text_2_2">--</span></div>
+          <div class="buy_text_3"></div>
+        </div>
+        <div class="buy_option">
+          <center>
+            <button class="w3-button buy_text_4">购买</button>
+            <br>
+            <input class="w3-input w3-hover-gray buy_text_5" type="tel" value="1" min="1" max="10" style="width:60%; border-style: none">
+            <hr style="width: 30%; position: relative;  top: -18px;">
+            <button type="button" class="buy_text_6">&#60;</button>
+          </center>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="train_info">
+    <div style="min-width: 10px; max-width: 10px; display: inline-block; background: #E95420"></div>
+    <div class="train_info_contain">
+      <div class="train_id_info_detail"> <img src="../static/icon/ic_directions_railway_black_48dp.png" align="middle" alt="train" height="20px">D1234 | 全程14:00 | 此程2:00 </div>
+      <div class="station_detail">
+        <div class="starting_station">上海虹桥<br>
+          06:00</div>
+        <div class="link_symbol">&rarr;</div>
+        <div class="ending_station">深圳北<br>
+          20:00</div>
+      </div>
+    </div>
+    <div class="ver_line"></div>
+    <div class="station_list">
+      <div class="station_contain">
+        <div class="station_text_1">上海虹桥</div>
+        <div class="station_text_2">08:46<span style="font-size: 13px"></span></div>
+        <div class="station_text_3">发车</div>
+      </div>
+      <div class="station_contain">
+        <div class="station_text_1">嘉善南</div>
+        <div class="station_text_2">09:14<span style="font-size: 13px"></span></div>
+        <div class="station_text_3">9分</div>
+      </div>
+      <div class="station_contain">
+        <div class="station_text_1">嘉兴南</div>
+        <div class="station_text_2">09:31<span style="font-size: 13px"></span></div>
+        <div class="station_text_3">3分</div>
+      </div>
+      <div class="station_contain">
+        <div class="station_text_1">桐乡</div>
+        <div class="station_text_2">09:45<span style="font-size: 13px"></span></div>
+        <div class="station_text_3">5分</div>
+      </div>
+      <div class="station_contain">
+        <div class="station_text_1">杭州东</div>
+        <div class="station_text_2">10:09<span style="font-size: 13px"></span></div>
+        <div class="station_text_3">5分</div>
+      </div>
+      <div class="station_contain">
+        <div class="station_text_1">绍兴北</div>
+        <div class="station_text_2">10:33<span style="font-size: 13px"></span></div>
+        <div class="station_text_3">2分</div>
+      </div>
+      <div class="station_contain">
+        <div class="station_text_1">余姚北</div>
+        <div class="station_text_2">10:54<span style="font-size: 13px"></span></div>
+        <div class="station_text_3">2分</div>
+      </div>
+      <div class="station_contain">
+        <div class="station_text_1">宁波</div>
+        <div class="station_text_2">11:18<span style="font-size: 13px"></span></div>
+        <div class="station_text_3">7分</div>
+      </div>
+      <div class="station_contain">
+        <div class="station_text_1">临海</div>
+        <div class="station_text_2">12:11<span style="font-size: 13px"></span></div>
+        <div class="station_text_3">2分</div>
+      </div>
+      <div class="station_contain">
+        <div class="station_text_1">深圳北</div>
+        <div class="station_text_2">20:39<span style="font-size: 13px"></span></div>
+        <div class="station_text_3">到达</div>
+      </div>
+    </div>
+  </div>
+</div>
  {%block content%}{%endblock%}
 </body>
 </html>
