@@ -500,6 +500,7 @@ max-width: 0px;
 .login_content {
 	color:#E95420;
 	padding-top: 3px;
+	text-align: center;
 }
 
 .close_icon {
@@ -555,6 +556,7 @@ max-width: 0px;
 	color: #FF0004;
 	height: 18px;
 	font-size: 12px;
+	text-align: left;
 }
 .login_window .error_message {
 	margin-left: 50px;
