@@ -489,12 +489,34 @@ max-width: 0px;
 	margin-left: -250px;
 	z-index: 3;
 	background: #FFFFFF;
-	-webkit-transition:all 0.4s linear;
-    -moz-transition:all 0.4s linear;
-    -o-transition:all 0.4s linear;
-    transition:all 0.4s linear;
+	-webkit-transition:all 0.4s;
+    -moz-transition:all 0.4s;
+    -o-transition:all 0.4s;
+    transition:all 0.4s;
+	backface-visibility: hidden;
 	visibility: hidden;
 	opacity: 0;
+}
+
+.register_window{
+	width: 500px;
+	height: 420px;
+	font-family: "微软雅黑", "sans-serif";
+	text-align: left;
+	position: absolute;
+	left:50%;
+	top:0px;
+	margin-top: 30px;
+	margin-left: -250px;
+	z-index: 3;
+	background: #FFFFFF;
+	-webkit-transition:all 0.4s;
+    -moz-transition:all 0.4s;
+    -o-transition:all 0.4s;
+    transition:all 0.4s;
+	transform: perspective(800px) rotateY(-180deg);
+	backface-visibility: hidden;
+	visibility: hidden;
 }
 
 .login_header {
@@ -512,6 +534,11 @@ max-width: 0px;
 .login_content {
 	color:#E95420;
 	padding-top: 3px;
+	text-align: center;
+}
+
+.register_content {
+	color:#E95420;
 	text-align: center;
 }
 
@@ -566,6 +593,14 @@ max-width: 0px;
 	display: none;
 }
 
+.rot180 {
+	transform: perspective(800px) rotateY(-180deg);
+}
+
+.rot0 {
+	transform: perspective(800px) rotateY(0deg);
+}
+
 .error_message {
 	color: #FF0004;
 	height: 18px;
@@ -575,3 +610,4 @@ max-width: 0px;
 .login_window .error_message {
 	margin-left: 50px;
 }
+

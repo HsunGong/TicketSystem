@@ -8,8 +8,8 @@
 <link href="../static/jQueryAssets/jquery.ui.core.min.css" rel="stylesheet" type="text/css">
 <link href="../static/jQueryAssets/jquery.ui.theme.min.css" rel="stylesheet" type="text/css">
 <link href="../static/jQueryAssets/jquery.ui.button.min.css" rel="stylesheet" type="text/css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="../static/css/font-awesome.min.css">
+<link rel="stylesheet" href="../static/css/icon.css">
 <script type="text/javascript" src="../static/js/jquery-3.3.1.min.js"></script>
 <!--<script src="jQueryAssets/jquery-1.11.1.min.js"></script>-->
 <script src="../static/jQueryAssets/jquery.ui-1.10.4.button.min.js"></script>
@@ -46,6 +46,44 @@
     </div>
 	<div class="login_button" id="login_button">登录</div>
 	<div class="register_button" id="register_button">注册</div>
+  </div>
+</div>
+<div class="w3-card-4 register_window">
+  <div class="login_header">注册
+	<i class="w3-large fa fa-arrow-left close_icon" id="return_to_login_window"></i></div>
+  <div class="w3-margin register_content">
+		<div class="w3-row w3-section">
+	    <div class="w3-col" style="width:50px"><i class="w3-xlarge fa fa-user-o" style="top: 6px; position: relative"></i></div>
+	    <div class="w3-rest">
+	      <input class="w3-input w3-border" id="register_name" name="login_input" type="text" placeholder="名字">
+        </div>
+      </div>
+	  <div class="w3-row w3-section">
+	    <div class="w3-col" style="width:50px"><i class="w3-xlarge fa fa-envelope-o" style="top: 6px; position: relative"></i></div>
+	    <div class="w3-rest">
+	      <input class="w3-input w3-border" id="login_input2" name="register_email" type="text" placeholder="邮箱">
+        </div>
+      </div>
+		<div class="w3-row w3-section">
+	    <div class="w3-col" style="width:50px"><i class="w3-xxlarge fa fa-mobile"></i></div>
+	    <div class="w3-rest">
+	      <input class="w3-input w3-border" id="register_mobile" name="login_input" type="text" placeholder="手机">
+        </div>
+      </div>
+	  <div class="w3-row w3-section">
+	    <div class="w3-col" style="width:50px"><i class="w3-xlarge fa fa-key" style="top: 6px; position: relative"></i></div>
+	    <div class="w3-rest">
+	      <input class="w3-input w3-border" id="register_password" name="password_input" type="password" placeholder="密码">
+        </div>
+</div>
+    <div class="w3-row w3-section">
+	    <div class="w3-col" style="width:50px"><i class="w3-xlarge fa fa-key" style="opacity: 0"></i></div>
+	    <div class="w3-rest">
+	      <input class="w3-input w3-border" id="register_password_repeat" name="password_input" type="password" placeholder="重复密码">
+        </div>
+	    <div class="error_message" id="login_error_message3"></div>
+    </div>
+    <div class="login_button" style="margin-top: -5px" id="register_button2">注册</div>
   </div>
 </div>
 

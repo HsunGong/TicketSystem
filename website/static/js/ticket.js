@@ -77,16 +77,26 @@ $(document).ready(function(){
 					$(".mask").fadeOut();
 					$(".login_window").css("opacity", "0");
 					$(".login_window").css("visibility", "hidden");
-					$("#user_button").addClass(".logged");
+					$(".register_window").css("visibility", "hidden");
+					$("#user_button").addClass("logged");
 				}
 			});
 		}
+	});
+	$("#register_button").click(function(){
+		$(".login_window").addClass("rot180");
+		$(".register_window").addClass("rot0");
+	});
+	$("#return_to_login_window").click(function(){
+		$(".login_window").removeClass("rot180");
+		$(".register_window").removeClass("rot0");
 	})
 	$("#user_button").click(function(){
-		if(! $("#user_button").hasClass(".logged"))
+		if(! $("#user_button").hasClass("logged"))
 		{
 			$(".mask").fadeIn();
 			$(".login_window").css("visibility", "visible");
+			$(".register_window").css("visibility", "visible");
 			$(".login_window").css("opacity", "1");
 		}
 	});
@@ -94,6 +104,7 @@ $(document).ready(function(){
 		$(".mask").fadeOut();
 		$(".login_window").css("opacity", "0");
 		$(".login_window").css("visibility", "hidden");
+		$(".register_window").css("visibility", "hidden");
 	});
 	$(".train_info").hide();
 	function find_avail(ob)
