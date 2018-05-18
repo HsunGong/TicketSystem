@@ -14,4 +14,4 @@ def login():
         return jsonify({'result': 0, 'message': '用户不存在或密码错误'})
 
 if (__name__ == '__main__'):
-    app.run()
+    app.run(host='0.0.0.0')

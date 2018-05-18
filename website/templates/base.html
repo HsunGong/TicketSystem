@@ -26,7 +26,7 @@
     <i class="fa fa-bars"></i>
   </a>
 </div>
-<div class="w3-card-4 login_window">
+<form class="w3-card-4 login_window" login>
   <div class="login_header">登录
 	<i class="w3-large fa fa-close close_icon" id="login_window_close"></i></div>
   <div class="w3-margin login_content">
@@ -46,12 +46,13 @@
     </div>
 	<div class="login_button" id="login_button">登录</div>
 	<div class="register_button" id="register_button">注册</div>
-  </div>
+  </form>
 </div>
 <div class="w3-card-4 register_window">
   <div class="login_header">注册
 	<i class="w3-large fa fa-arrow-left close_icon" id="return_to_login_window"></i></div>
   <div class="w3-margin register_content">
+    <form register>
 		<div class="w3-row w3-section">
 	    <div class="w3-col" style="width:50px"><i class="w3-xlarge fa fa-user-o" style="top: 6px; position: relative"></i></div>
 	    <div class="w3-rest">
@@ -83,6 +84,7 @@
         </div>
 	    <div class="error_message" id="login_error_message3"></div>
     </div>
+    </form>
     <div class="login_button" style="margin-top: -5px" id="register_button2">注册</div>
   </div>
 </div>

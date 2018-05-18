@@ -61,6 +61,30 @@ $(document).ready(function(){
 		$("#login_error_message").html("");
 		return 1;
 	}
+	$("form[login] input").keypress(function(e) {  
+		if (e.which == 13) {
+			var inputs = $("form[login]").find("input");
+			var idx = inputs.index(this);
+			if (idx != inputs.length - 1) {
+				inputs[idx + 1].focus();
+				inputs[idx + 1].select();
+			}  
+			else
+				$("#login_button").click();
+		}  
+	});
+	$("form[register] input").keypress(function(e) {  
+		if (e.which == 13) {
+			var inputs = $("form[register]").find("input");
+			var idx = inputs.index(this);
+			if (idx != inputs.length - 1) {
+				inputs[idx + 1].focus();
+				inputs[idx + 1].select();
+			}  
+			else
+				$("#register_button2").click();
+		}  
+	});
 	$("#login_input, #password_input").blur(login_input_check_len);
 	$("#login_button").click(function(){
 		if(login_input_check_len() && login_input_check_empty())
@@ -77,26 +101,28 @@ $(document).ready(function(){
 					$(".mask").fadeOut();
 					$(".login_window").css("opacity", "0");
 					$(".login_window").css("visibility", "hidden");
-					$(".register_window").css("visibility", "hidden");
 					$("#user_button").addClass("logged");
 				}
 			});
 		}
 	});
 	$("#register_button").click(function(){
+		$(".login_window").css("visibility", "hidden");
+		$(".register_window").css("visibility", "visible");
 		$(".login_window").addClass("rot180");
 		$(".register_window").addClass("rot0");
 	});
 	$("#return_to_login_window").click(function(){
+		$(".login_window").css("visibility", "visible");
 		$(".login_window").removeClass("rot180");
 		$(".register_window").removeClass("rot0");
+		$(".register_window").css("visibility", "hidden");
 	})
 	$("#user_button").click(function(){
 		if(! $("#user_button").hasClass("logged"))
 		{
 			$(".mask").fadeIn();
 			$(".login_window").css("visibility", "visible");
-			$(".register_window").css("visibility", "visible");
 			$(".login_window").css("opacity", "1");
 		}
 	});
