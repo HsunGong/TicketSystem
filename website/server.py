@@ -1,9 +1,17 @@
 from flask import Flask, render_template, request, jsonify
 app = Flask(__name__)
 
-@app.route('/')
+@app.route("/")
+def to_home():
+    return home_page();
+
+@app.route('/home')
 def home_page():
-    return render_template('base.html');
+    return render_template('home.html', page="home");
+
+@app.route('/search')
+def search_page():
+    return render_template('search.html', page="search");
 
 @app.route('/login', methods = ['POST'])
 def login():

@@ -1,5 +1,54 @@
  
 $(document).ready(function(){
+	var availableTags = [
+		"ActionScript",
+		"AppleScript",
+		"Asp",
+		"BASIC",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C",
+		"C++",
+		"Clojure",
+		"COBOL",
+		"ColdFusion",
+		"Erlang",
+		"Fortran",
+		"Groovy",
+		"Haskell",
+		"Java",
+		"JavaScript",
+		"Lisp",
+		"Perl",
+		"PHP",
+		"Python",
+		"Ruby",
+		"Scala",
+		"Scheme"
+	  ];
+	$( "#tmp" ).autocomplete({
+		source: availableTags
+	  });
 	jQuery.fn.shake = function (intShakes /*Amount of shakes*/, intDistance /*Shake distance*/, intDuration /*Time duration*/) {  
 		this.each(function () {  
 			var jqNode = $(this);  
@@ -12,6 +61,7 @@ $(document).ready(function(){
     });  
     return this;  
 	};  
+
 	function getByteLen(val) {
             var len = 0;
             for (var i = 0; i < val.length; i++) {
@@ -61,8 +111,89 @@ $(document).ready(function(){
 		$("#login_error_message").html("");
 		return 1;
 	}
-	$("form[login] input").keypress(function(e) {  
-		if (e.which == 13) {
+	$(".my_checkbox").click(function(){
+		var $tmp = $(".my_checkbox");
+		if($tmp.attr("value") == "0")
+		{
+			$(".checkbox_icon").html("check_box");
+			$tmp.attr("value", "1");
+		}
+		else
+		{
+			$(".checkbox_icon").html("check_box_outline_blank");
+			$tmp.attr("value", "0");
+		}
+	})
+
+	function tag_re()
+	{
+		var $tmp = $(".tag");
+		for(var i = 0; i < $tmp.length; ++i)
+			if($($tmp[i]).attr("value") == "1")
+			{
+				if(! $($tmp[i]).hasClass("glass_effect"))
+					$($tmp[i]).addClass("glass_effect");
+			}
+			else	
+				if($($tmp[i]).hasClass("glass_effect"))
+					$($tmp[i]).removeClass("glass_effect");
+	}
+	tag_re();
+
+	function tag_click(obj)
+	{
+		var $tmp = $(obj);
+		$tmp.toggleClass("glass_effect");
+		if($tmp.attr("value") == "0")
+			$tmp.attr("value", "1");
+		else
+			$tmp.attr("value", "0");
+	}
+
+//	$(".tag").click(function(){tag_click(event.target)});
+
+	$("#car_type .tag").click(function(){
+		var $tmp = $(event.target);
+		tag_click($tmp.get(0));
+		if(typeof($tmp.attr("all")) == "undefined")
+		{
+			if($("#car_type .tag[all]").attr("value") == "1")
+				tag_click($("#car_type .tag[all]").get(0));
+		}
+		else
+		{
+			if($("#car_type .tag[all]").attr("value") == "1")
+			{
+				$("#car_type .tag[value='1']").attr("value", "0");
+				$("#car_type .tag[all]").attr("value", "1");
+				tag_re();
+			}
+		}
+	})
+
+	$("#dec").click(function(){
+		tag_click($("#inc").get(0));
+		tag_click($("#dec").get(0));
+	})
+	$("#inc").click(function(){
+		tag_click($("#inc").get(0));
+		tag_click($("#dec").get(0));
+	})
+
+	$(".sort_key .tag").click(function(){
+		try{
+		var $tmp = $(event.target);
+		if($tmp.attr("value") == '1')
+			return;
+		tag_click($(".sort_key .tag[value='1']").get(0));
+		tag_click($tmp.get(0));
+		}
+		catch(e)
+		{alert(e.message);}
+	})
+
+	$("form[login] input").keypress(function() {  
+		if (event.which == 13) {
 			var inputs = $("form[login]").find("input");
 			var idx = inputs.index(this);
 			if (idx != inputs.length - 1) {
@@ -99,6 +230,7 @@ $(document).ready(function(){
 				{
 					$("#user_name").html(data.message);
 					$(".mask").fadeOut();
+					$(".login_window").css("top", "-400px");
 					$(".login_window").css("opacity", "0");
 					$(".login_window").css("visibility", "hidden");
 					$("#user_button").addClass("logged");
@@ -122,12 +254,14 @@ $(document).ready(function(){
 		if(! $("#user_button").hasClass("logged"))
 		{
 			$(".mask").fadeIn();
+			$(".login_window").css("top", "0px");
 			$(".login_window").css("visibility", "visible");
 			$(".login_window").css("opacity", "1");
 		}
 	});
 	$("#login_window_close").click(function(){
 		$(".mask").fadeOut();
+		$(".login_window").css("top", "-400px");
 		$(".login_window").css("opacity", "0");
 		$(".login_window").css("visibility", "hidden");
 		$(".register_window").css("visibility", "hidden");
