@@ -154,7 +154,7 @@ button {
 .ver_line {
 	width: 0px;
 	height: 85%;
-	display: inline-flex;
+	display: inline-block;
 	position: relative;
 	border-left: 1px solid #FFFFFF;
 	top: 7%;
@@ -175,11 +175,10 @@ button {
 	background: rgba(167, 167, 167, 0.27);
 }
 .buy_option {
-	min-width: 0px;
 	background: rgba(167, 167, 167, 0.27);
 	text-align: center;
 	align-content: center;
-	max-width: 0px;
+	width: 0px;
 	overflow: hidden;
 }
 .buy_option_slip_right {
@@ -187,47 +186,38 @@ button {
 	-moz-animation: b_slip_right 0.2s;
 	-webkit-animation: b_slip_right 0.2s;
 	-o-animation: b_slip_right 0.2s;
-	min-width: 80px;
-	max-width: 80px;
+	width: 80px;
 }
 @keyframes b_slip_right {
  from {
-min-width: 0px;
-max-width: 0px;
+	width: 0px;
 }
  to {
-min-width: 80px;
-max-width: 80px;
+	width: 80px;
 }
 }
 @-moz-keyframes b_slip_right {
  from {
-min-width: 0px;
-max-width: 0px;
+	width: 0px;
 }
  to {
-min-width: 80px;
-max-width: 80px;
+	width: 80px;
 }
 }
 @-webkit-keyframes b_slip_right {
  from {
-min-width: 0px;
-max-width: 0px;
+	width: 0px;
 }
  to {
-min-width: 80px;
-max-width: 80px;
+	width: 80px;
 }
 }
 @-o-keyframes b_slip_right {
  from {
-min-width: 0px;
-max-width: 0px;
+	width: 0px;
 }
  to {
-min-width: 80px;
-max-width: 80px;
+	width: 80px;
 }
 }
 .buy_option_slip_left {
@@ -235,47 +225,38 @@ max-width: 80px;
 	-moz-animation: b_slip_left 0.2s;
 	-webkit-animation: b_slip_left 0.2s;
 	-o-animation: b_slip_left 0.2s;
-	min-width: 0px;
-	max-width: 0px;
+	width: 0px;
 }
 @keyframes b_slip_left {
  from {
-min-width: 80px;
-max-width: 80px;
+	width: 80px;
 }
  to {
-min-width: 0px;
-max-width: 0px;
+	width: 0px;
 }
 }
 @-moz-keyframes b_slip_left {
  from {
-min-width: 80px;
-max-width: 80px;
+	width: 80px;
 }
  to {
-min-width: 0px;
-max-width: 0px;
+	width: 0px;
 }
 }
 @-webkit-keyframes b_slip_left {
  from {
-min-width: 80px;
-max-width: 80px;
+	width: 80px;
 }
  to {
-min-width: 0px;
-max-width: 0px;
+	width: 0px;
 }
 }
 @-o-keyframes b_slip_left {
  from {
-min-width: 80px;
-max-width: 80px;
+	width: 80px;
 }
  to {
-min-width: 0px;
-max-width: 0px;
+	width: 0px;
 }
 }
 .buy_text_1 {
@@ -328,7 +309,6 @@ max-width: 0px;
 	font-family: "微软雅黑", "sans-serif";
 	display: flex;
 	height: 97px;
-	text-align: left;
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
@@ -347,7 +327,6 @@ max-width: 0px;
 .station_list {
 	height: 100%;
 	width: auto;
-	display: inline-flex;
 	overflow-x: hidden;
 	overflow-y: hidden;
 }
@@ -360,11 +339,11 @@ max-width: 0px;
 	font-size: 22px;
 	position: static;
 	line-height: 30px;
-	display: inline-flex;
+	display: inline-block;
 }
 .station_detail .link_symbol {
 	position: static;
-	display: inline-flex;
+	display: inline-block;
 	color: #636363;
 	margin-left: 10px;
 	margin-right: 10px;
@@ -373,7 +352,7 @@ max-width: 0px;
 	position: static;
 	color: #545454;
 	font-size: 22px;
-	display: inline-flex;
+	display: inline-block;
 	line-height: 30px;
 }
 .station_detail {
@@ -391,6 +370,7 @@ max-width: 0px;
 	min-width: 80px;
 	max-width: 80px;
 	text-align: center;
+	display: inline-block;
 }
 
 .station_text_1 {
@@ -647,7 +627,16 @@ max-width: 0px;
 	text-align: left;
 	box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.3);
 	color: rgba(255, 255, 255, 1);
+	overflow: hidden;
+	margin-left: auto;
+	margin-right: auto;
+	transition: 1s;
+}
+.search_window_disp {
 	margin-bottom: 7px;
+	max-height: 280px !important;
+	max-width: 100% !important;
+	opacity: 1 !important;
 }
 
 .search_mask {
@@ -833,19 +822,24 @@ max-width: 0px;
 	background-color: rgba(255, 192, 104, 0.808);
 }
 .tag_list .glass_effect {
-	box-shadow: 0 0 5px rgba(0, 0, 0, 0.3) inset;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.3) inset !important;
 }
 .tag {
+	margin-right: 5px;
 	text-align: center;
 	padding: 3px 15px 3px 15px;
 	background-color: rgba(255, 255, 255, 0.3);
 	display: inline-block;
 	box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 	margin-bottom: 5px;
+	transition: 0.2s;
 }
 .tag:hover {
 	cursor: pointer;
+	box-shadow: 0px 0px 10px rgb(108, 59, 245);
 }
 .sort_key {
 	display: inline-block;
+}
+.tmp_container {
 }
