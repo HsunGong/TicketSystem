@@ -94,8 +94,8 @@ private:
 	// node.pos = 1, and _last_data++;
 	// but the ios::end is at ((_last_data+1)*bits,ios::beg))
 	// because the fisrt block is filled by others
-	size_t _last_data, _last_idx;
-	size_t allsize;
+	size_t _last_data = 0, _last_idx = 1;
+	size_t allsize = 0;
 	// cmp(k, key[ss]), k < key[ss] then s.t.
 	Compare cmp;
 	idxNode root;
@@ -545,6 +545,7 @@ private:
 	//key always return the min key between(oldnode, newnode) for usage
 	pair<Key, size_t> pinsert(const Key &k, const V &val, size_t _cur) {
 		idxNode cur;
+
 		read(_cur, cur);
 
 		size_t i;
@@ -767,6 +768,9 @@ public:
 		if (!in) {
 			ofstream out(idxfile, ios::binary | ios::out);		
 			if (!out) throw file_error();
+			out.write(reinterpret_cast<char*>(&_last_idx), sizeof(size_t));
+			out.write(reinterpret_cast<char*>(&_last_data), sizeof(size_t));
+			out.write(reinterpret_cast<char*>(&allsize), sizeof(size_t));
 			out.close();
 			out.open(datafile);
 			if (!out) throw file_error();
@@ -779,6 +783,9 @@ public:
 			_last_data = 0;// init with data has no nodes
 			_last_idx = 1;// init with data has 1 node(root)
 			allsize = 0;
+
+			idx.open(idxfile, ios::binary | ios::in | ios::out);
+			data.open(datafile, ios::binary | ios::in | ios::out);
 		}
 		else {
 			in.close();
