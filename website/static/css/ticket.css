@@ -842,4 +842,5 @@ button {
 	display: inline-block;
 }
 .tmp_container {
+	display: none;
 }

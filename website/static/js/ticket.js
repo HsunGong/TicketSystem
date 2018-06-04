@@ -398,6 +398,12 @@ $(document).ready(function () {
 		return re;
 	}
 
+	function filter() {
+		var $tag = $("#car_type");
+		var $result = $(".search_result");
+		$result = $result.find("[kind_tag=" + )
+	}
+
 	var flag = 0;
 	$(".search_button").click(function () {
 		$.post("/search", {flag: flag % 3}, function (data) {
