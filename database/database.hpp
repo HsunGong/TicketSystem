@@ -95,7 +95,7 @@ private:
 	// but the ios::end is at ((_last_data+1)*bits,ios::beg))
 	// because the fisrt block is filled by others
 	size_t _last_data, _last_idx;
-
+	size_t allsize;
 	// cmp(k, key[ss]), k < key[ss] then s.t.
 	Compare cmp;
 	idxNode root;
@@ -502,6 +502,7 @@ private:
 	}
 
 	pair<Key, size_t> addData(const Key &k, const V &val, const size_t _cur) {
+		++allsize;
 		dataNode cur;
 		read(_cur, cur);
 
@@ -587,6 +588,7 @@ private:
 	}
 
 	pair<Key, size_t> delData(const Key &k, const size_t &_neighborpos, const size_t &_cur, const bool &left) {
+		--allsize;
 		dataNode cur;
 
 		read(_cur, cur);
@@ -777,7 +779,7 @@ public:
 			//root
 			_last_data = 0;// init with data has no nodes
 			_last_idx = 1;// init with data has 1 node(root)
-
+			allsize = 0;
 		}
 		else {
 			in.close();
@@ -791,7 +793,7 @@ public:
 			idx.seekg(0);
 			idx.read(reinterpret_cast<char*>(&_last_idx), sizeof(size_t));
 			idx.read(reinterpret_cast<char*>(&_last_data), sizeof(size_t));
-
+			idx.read(reinterpret_cast<char*>(&allsize), sizeof(size_t));
 			read(1, root);
 
 			data.open(datafile, ios::binary | ios::in | ios::out);
@@ -812,6 +814,7 @@ public:
 		idx.seekp(0);
 		idx.read(reinterpret_cast<char*>(&_last_idx), sizeof(size_t));
 		idx.read(reinterpret_cast<char*>(&_last_data), sizeof(size_t));
+		idx.read(reinterpret_cast<char*>(&allsize), sizeof(size_t));
 
 		data.close();
 		idx.close();
@@ -833,6 +836,7 @@ public:
 		data.open(datafile);
 		_last_data = 0;
 		_last_idx = 1;
+		allsize = 0;
 		read(root);
 		tail.left = 0;
 	}
