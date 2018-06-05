@@ -192,10 +192,8 @@ private:
 private:
 
 	// in the faNode, but not add in the file
-	// have to judge k outside
+	// have to judge all things outside
 	// and suppose no repetition
-	////no writing
-	//no judging split or ..
 	void add(idxNode &x, const Key &k, const size_t son_pos) {
 		if (x.size == idxSize) throw node_full();
 
@@ -239,7 +237,9 @@ private:
 		//way 2
 		size_t i;
 		for (i = 0; i < x.size; ++i)
-			if (cmp(k, x.key[i])) break;
+			if (cmp(k, x.key[i])) 	break;//??
+
+		if (i > 0 && !cmp(k, x.key[i - 1]) && !cmp(x.key[i - 1], k)) throw repetition();
 
 		for (size_t j = x.size; j > i; --j) {
 			x.key[j] = x.key[j - 1];
@@ -286,7 +286,7 @@ public:
 		iterator(database *p, const dataNode &x, const size_t &cur = 0)
 			: now(x), cur(cur), mine(p) { }
 		iterator(database *p, const size_t &_posintree, const size_t &_posinnode)
-			: cur(cur), mine(p) { 
+			: cur(_posinnode), mine(p) {
 			(*mine).read(_posintree, now);
 		}
 		iterator(const iterator &other)
@@ -300,17 +300,18 @@ public:
 		}
 
 		iterator &operator++() {
+
 			if (now.pos == 0) throw out_of_bound();
 			if (now.size > cur + 1) {
 				++cur;
 				return *this;
 			}
 			if (now.right == 0) {
-				now = tail;
+				now = (*mine).tail;
 				cur = 0;
 				return *this;
 			}
-			read(now.right, now);
+			(*mine).read(now.right, now);
 			cur = 0;
 			return *this;
 		}
@@ -328,7 +329,7 @@ public:
 				return *this;
 			}
 			if (now.left == 0) throw out_of_bound();
-			read(now.left, now);//now.pos == 0 //tail also ok
+			(*mine).read(now.left, now);//now.pos == 0 //tail also ok
 			cur = now.size - 1;
 			return *this;
 		}
@@ -354,17 +355,15 @@ public:
 
 	};
 
-	//friend class iterator;
-
 private:
 
 	void read(size_t pos, dataNode &x) {
-		if (pos == 0) return;
+		if (pos == 0) throw not_exist();
 		data.seekg(pos*bits);
 		data.read(reinterpret_cast<char*>(&x), sizeof(dataNode));
 	}
 	void read(size_t pos, idxNode &x) {
-		if (pos == 0) return;
+		if (pos == 0) throw not_exist();
 		idx.seekg(pos*bits);
 		idx.read(reinterpret_cast<char*>(&x), sizeof(idxNode));
 	}
@@ -419,9 +418,14 @@ private:
 
 		while (true) {
 			if (cur.type == 1) {// next is leaf
+				size_t _curpos2 = cur.son[1];
+				read(cur.son[0], cur);
+				if (cur.size == 0) return _curpos2;
 				return cur.son[0];
 			}
+			size_t _curpos2 = cur.son[1];
 			read(cur.son[0], cur);
+			if (cur.size == 1) read(_curpos2, cur);
 		}
 	}
 
@@ -494,11 +498,18 @@ private:
 		++_last_data;
 		_new.pos = _last_data;
 
-		dataNode tmp;
-		read(cur.right, tmp);
-		_new.right = cur.right;
-		tmp.left = _last_data;
-		write(tmp);
+		if (cur.right) {
+			dataNode tmp;
+			read(cur.right, tmp);
+			_new.right = cur.right;
+			tmp.left = _last_data;
+			write(tmp);
+		}
+		else {
+			tail.left = _last_data;
+			data.seekp(bits - sizeof(size_t));
+			data.write(reinterpret_cast<char*>(&tail.left), sizeof(size_t));
+		}
 
 		cur.right = _last_data;//newNode pos
 		_new.left = cur.pos;
@@ -512,7 +523,6 @@ private:
 		read(_cur, cur);
 
 		if (cur.size < dataSize) {
-			if (!_cur) _cur = ++_last_data;
 			_tmpPosinTree = _cur;
 			_tmpPosinNode = add(cur, k, val);
 			write(cur);
@@ -561,13 +571,21 @@ private:
 
 		pair<Key, size_t> p;
 		if (cur.type == 1) {
-			if (_cur == 0) {
+			if (cur.size == 1) {//default is has node, but dont has son
+				///maybe never happen???
 				cur.pos = _cur = ++_last_idx;
 				dataNode tmp(k, val, ++_last_data);
+				dataNode tmp2;
+				tmp2.pos = ++_last_data;
+				cur.son[0] = tmp2.pos;
 				cur.son[1] = tmp.pos;
 				cur.key[1] = k;
 				p.first = k;
-				p.second = tmp.pos;
+				p.second = 0;
+
+				write(tmp);
+				write(tmp2);
+				write(cur);
 				return p;
 			}
 			else p = addData(k, val, cur.son[i]);
@@ -595,10 +613,13 @@ private:
 		}
 
 		_left.left = _del.left;
-		dataNode tmp;
-		read(_del.left, tmp);
-		tmp.right = _left.pos;
-		write(tmp);
+		if (_del.left) {
+			dataNode tmp;
+			read(_del.left, tmp);
+			tmp.right = _left.pos;
+			write(tmp);
+		}
+
 
 		_left.size += _del.size;
 		return;
@@ -618,8 +639,10 @@ private:
 		_tmpPosinTree = cur.pos;
 		_tmpPosinNode = del(cur, i);
 
-		if (cur.size >= hdataSize) return pair<Key, size_t>(cur.key[0], 0);
-
+		if (cur.size >= hdataSize) {
+			write(cur);
+			return pair<Key, size_t>(cur.key[0], 0);
+		}
 		dataNode neighbor;
 		read(_neighborpos, neighbor);
 		if (left) {
@@ -782,7 +805,7 @@ public:
 		hidxSize = half(idxSize);
 		
         ifstream in(idxfile);//read
-		if (!in && in) {
+		if (!in || in) {
 			ofstream out(idxfile, ios::binary | ios::out);		
 			if (!out) throw file_error();
 			out.write(reinterpret_cast<char*>(&_last_idx), sizeof(size_t));
@@ -879,31 +902,20 @@ public:
 	iterator begin() {
 		/*if (empty()) throw not_exist();
 		return iterator(this, head, 0);*/
-		if (empty()) throw not_exist();
+		if (empty()) return end();
 		
-		idxNode cur;
-		read(1, cur);
-
-		while (true) {
-			if (cur.type == 1) {// next is leaf
-				dataNode leaf;
-				read(cur.son[0], leaf);
-				return iterator(this, leaf, 0);
-			}
-
-			//type == 0, not the last level idxnode
-			read(cur.son[0], cur);
-		}
+		size_t cur = pbegin(1);
+		return iterator(this, cur, 0);
 	}
 
 	iterator end() {
-		if (empty()) throw not_exist();
 		return iterator(this, tail, 0);
 	}
 
 	// while split node, new node always inherit the larger part
 	// while merge node, old (the one left)node always inherit the smaller part
 	iterator insert(const Key &k, const V &val) {
+
 		if (empty()) {
 			++root.size;
 			++allsize;
@@ -911,7 +923,13 @@ public:
 			root.son[1] = ++_last_data;
 			root.pos = 1;
 			dataNode tmp(k, val, _last_data);
+			root.son[0] = ++_last_data;
+			dataNode tmp2;
+			tmp2.pos = _last_data;
+			tmp2.right = tmp.pos;
+			tmp.left = tmp2.right;
 
+			write(tmp2);
 			write(tmp);
 			write(root);
 			return iterator(this, tmp, 0);
@@ -1159,3 +1177,4 @@ return newNode;
 //	
 //	_new_key = newNode.key[0];
 //	return newNode.pos;
+//}
