@@ -639,8 +639,10 @@ private:
 		_tmpPosinTree = cur.pos;
 		_tmpPosinNode = del(cur, i);
 
-		if (cur.size >= hdataSize) return pair<Key, size_t>(cur.key[0], 0);
-
+		if (cur.size >= hdataSize) {
+			write(cur);
+			return pair<Key, size_t>(cur.key[0], 0);
+		}
 		dataNode neighbor;
 		read(_neighborpos, neighbor);
 		if (left) {
@@ -902,19 +904,8 @@ public:
 		return iterator(this, head, 0);*/
 		if (empty()) return end();
 		
-		idxNode cur;
-		read(1, cur);
-
-		while (true) {
-			if (cur.type == 1) {// next is leaf
-				dataNode leaf;
-				read(cur.son[0], leaf);
-				return iterator(this, leaf, 0);
-			}
-
-			//type == 0, not the last level idxnode
-			read(cur.son[0], cur);
-		}
+		size_t cur = pbegin(1);
+		return iterator(this, cur, 0);
 	}
 
 	iterator end() {
