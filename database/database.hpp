@@ -447,10 +447,10 @@ private:
 	//k is the insert key, and insert son pos is son_pos which > key
 	pair<Key, size_t> addIdx(const Key &k, const size_t son_pos, idxNode &cur) {
 		if (cur.size < dataSize) {
-			if (!cur.pos) cur.pos = ++_last_idx;
+			//if (!cur.pos) cur.pos = ++_last_idx;
 			add(cur, k, son_pos);
 			write(cur);
-
+			
 			return pair<Key, size_t>(cur.key[1], 0);
 		}
 
@@ -560,7 +560,18 @@ private:
 
 
 		pair<Key, size_t> p;
-		if (cur.type == 1) 	p = addData(k, val, cur.son[i]);
+		if (cur.type == 1) {
+			if (_cur == 0) {
+				cur.pos = _cur = ++_last_idx;
+				dataNode tmp(k, val, ++_last_data);
+				cur.son[1] = tmp.pos;
+				cur.key[1] = k;
+				p.first = k;
+				p.second = tmp.pos;
+				return p;
+			}
+			else p = addData(k, val, cur.son[i]);
+		}
 		else 	p = pinsert(k, val, cur.son[i]);
 
 		if (p.second) p = addIdx(p.first, p.second, cur);// once p.second == 0, all of the recursive functions.second == 0
