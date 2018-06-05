@@ -975,6 +975,7 @@ public:
 			if (tmp.size == i) throw not_exist();
 			_tmpPosinTree = tmp.pos;
 			_tmpPosinNode = del(tmp, i);
+			write(tmp);
 			return iterator(this, _tmpPosinTree, _tmpPosinNode);
 		}
 		//way
