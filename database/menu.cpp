@@ -11,7 +11,7 @@ struct cmp {
 	template<class Key>
 	bool operator ()(const Key &a, const Key &b)const { return a.x > b.x; }
 };
-#define mysize 500
+#define mysize 5000
 int p[mysize];
 void swap(int &a, int&b) {
 	int c;
@@ -40,53 +40,54 @@ int main() {
 	iter tmp = mydb.begin();
 	map<int, long long>::iterator it = m.begin();
 
-	for (size_t i = 0; i < 500; ++i) {
+	for (size_t i = 0; i < mysize; ++i) {
 		k = p[i];
 		//k = 100 - i;
 		mydb.insert(k, i);		
 		m.insert(pair<int, long long>(k, i));
 		tmp = mydb.find(k);
 		it = m.find(k);
-		cout << *tmp << " and " << it->second << '\n';
+		//cout << *tmp << " and " << it->second << '\n';
 	}
-	cout << endl;
-	tmp = mydb.begin();
-	it = m.begin();
-	for (size_t i = 0; i < 500; ++i) {
-		if (*tmp != it->second) {
-			cout << i << " find  " << *tmp;
-			cout << " map " << it->second << '\n';
-		}
+	//cout << endl;
+	//tmp = mydb.begin();
+	//it = m.begin();
+	//for (size_t i = 0; i < mysize; ++i) {
+	//	if (*tmp != it->second) {
+	//		cout << i << " find  " << *tmp;
+	//		cout << " map " << it->second << '\n';
+	//	}
 
-		++tmp;
-		++it;
-	}cout << endl;
-
-
-	for (size_t i = 0; i < 300; ++i) {
-		mydb.modify(i, i);
-		m[i] = i;
-	}cout << endl;
-	tmp = mydb.begin();
-	it = m.begin();
-	for (size_t i = 0; i < 500; ++i) {
-		if (*tmp != it->second) {
-			cout << i << " find  " << *tmp;
-			cout << " map " << it->second << '\n';
-		}
-		++tmp;
-		++it;
-	}cout << endl;
+	//	++tmp;
+	//	++it;
+	//}cout << endl;
 
 
-	for (size_t i = 0; i < 500; ++i) {
+	//for (size_t i = 0; i < 300; ++i) {
+	//	mydb.modify(i, i);
+	//	m[i] = i;
+	//}cout << endl;
+	//tmp = mydb.begin();
+	//it = m.begin();
+	//for (size_t i = 0; i < mysize; ++i) {
+	//	if (*tmp != it->second) {
+	//		cout << i << " find  " << *tmp;
+	//		cout << " map " << it->second << '\n';
+	//	}
+	//	++tmp;
+	//	++it;
+	//}cout << endl;
+
+	int er = 50;
+	for (size_t i = 0; i < er; ++i) {
 		k = p[i];
 		mydb.erase(k);
 		m.erase(k);
 	}cout << endl;
+
 	tmp = mydb.begin();
 	it = m.begin();
-	for (size_t i = 0; i < 500; ++i) {
+	for (size_t i = 0; i < mysize - er; ++i) {
 		if (*tmp != it->second) {
 			cout << i << " find  " << *tmp;
 			cout << " map " << it->second << '\n';
