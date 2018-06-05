@@ -123,7 +123,7 @@ private:
 
 		// can be optimized
 		// type == 1 last level; type == 0, not last level
-		size_t type;
+		size_t type = 1;
 
 	public:
 
@@ -319,7 +319,9 @@ public:
 			++(*this);
 			return tmp;
 		}
-
+		Key &findkey() {
+			return now.key[cur];
+		}
 		iterator &operator--() {
 			if (cur > 0) {
 				--cur;
@@ -357,10 +359,12 @@ public:
 private:
 
 	void read(size_t pos, dataNode &x) {
+		if (pos == 0) return;
 		data.seekg(pos*bits);
 		data.read(reinterpret_cast<char*>(&x), sizeof(dataNode));
 	}
 	void read(size_t pos, idxNode &x) {
+		if (pos == 0) return;
 		idx.seekg(pos*bits);
 		idx.read(reinterpret_cast<char*>(&x), sizeof(idxNode));
 	}
@@ -443,6 +447,7 @@ private:
 	//k is the insert key, and insert son pos is son_pos which > key
 	pair<Key, size_t> addIdx(const Key &k, const size_t son_pos, idxNode &cur) {
 		if (cur.size < dataSize) {
+			if (!cur.pos) cur.pos = ++_last_idx;
 			add(cur, k, son_pos);
 			write(cur);
 
@@ -501,12 +506,13 @@ private:
 		return;
 	}
 
-	pair<Key, size_t> addData(const Key &k, const V &val, const size_t _cur) {
+	pair<Key, size_t> addData(const Key &k, const V &val, size_t _cur) {
 		++allsize;
 		dataNode cur;
 		read(_cur, cur);
 
 		if (cur.size < dataSize) {
+			if (!_cur) _cur = ++_last_data;
 			_tmpPosinTree = _cur;
 			_tmpPosinNode = add(cur, k, val);
 			write(cur);
@@ -558,7 +564,7 @@ private:
 		else 	p = pinsert(k, val, cur.son[i]);
 
 		if (p.second) p = addIdx(p.first, p.second, cur);// once p.second == 0, all of the recursive functions.second == 0
-		write(cur);
+		//write(cur);
 
 		return p;
 
@@ -765,7 +771,7 @@ public:
 		hidxSize = half(idxSize);
 		
         ifstream in(idxfile);//read
-		if (!in) {
+		if (!in && in) {
 			ofstream out(idxfile, ios::binary | ios::out);		
 			if (!out) throw file_error();
 			out.write(reinterpret_cast<char*>(&_last_idx), sizeof(size_t));
