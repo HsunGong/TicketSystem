@@ -4,9 +4,7 @@
 #define DATABASE_H
 
 #include <iostream>
-#include <cstdio>
 #include <fstream>
-#include <cstring>
 #include <utility>
 //#include <cmath>
 using namespace std;
@@ -17,17 +15,7 @@ using namespace std;
 typedef int int32_t;
 #pragma region class exception
 
-class errors {
-protected:
-	const string variant = "";
-	string detail = "";
-public:
-	errors() {}
-	errors(const errors &ec) : variant(ec.variant), detail(ec.detail) {}
-	virtual string what() {
-		return variant + " " + detail;
-	}
-};
+class errors {};
 
 class file_error : public errors { };
 //class index_out : public errors { };
@@ -320,7 +308,7 @@ public:
 			++(*this);
 			return tmp;
 		}
-		Key &findkey() {
+		Key &getkey() {
 			return now.key[cur];
 		}
 		iterator &operator--() {
