@@ -141,17 +141,12 @@ $(document).ready(function () {
 	$("#car_type [all]").click(function () {
 		var $tmp = $(event.target);
 		tag_click($tmp.get(0));
-		if (typeof ($tmp.attr("all")) == "undefined") {
-			if ($("#car_type .tag[all]").attr("value") == "1")
-				tag_click($("#car_type .tag[all]").get(0));
+		if ($("#car_type .tag[all]").attr("value") == "1") {
+			$("#car_type .tag[value='1']").attr("value", "0");
+			$("#car_type .tag[all]").attr("value", "1");
+			tag_init();
 		}
-		else {
-			if ($("#car_type .tag[all]").attr("value") == "1") {
-				$("#car_type .tag[value='1']").attr("value", "0");
-				$("#car_type .tag[all]").attr("value", "1");
-				tag_init();
-			}
-		}
+		filter();
 	})
 
 	function tag_reset() {
@@ -181,36 +176,13 @@ $(document).ready(function () {
 		$("#car_type .tag:not([all])").click(function () {
 			var $tmp = $(event.target);
 			tag_click($tmp.get(0));
-			if (typeof ($tmp.attr("all")) == "undefined") {
-				if ($("#car_type .tag[all]").attr("value") == "1")
-					tag_click($("#car_type .tag[all]").get(0));
-			}
-			else {
-				if ($("#car_type .tag[all]").attr("value") == "1") {
-					$("#car_type .tag[value='1']").attr("value", "0");
-					$("#car_type .tag[all]").attr("value", "1");
-					tag_init();
-				}
-			}
+			if ($("#car_type .tag[all]").attr("value") == "1")
+				tag_click($("#car_type .tag[all]").get(0));
+			filter();
 		})
+		filter();
 	}
 
-	$("#dec").click(function () {
-		tag_click($("#inc").get(0));
-		tag_click($("#dec").get(0));
-	})
-	$("#inc").click(function () {
-		tag_click($("#inc").get(0));
-		tag_click($("#dec").get(0));
-	})
-
-	$(".sort_key .tag").click(function () {
-		var $tmp = $(event.target);
-		if ($tmp.attr("value") == '1')
-			return;
-		tag_click($(".sort_key .tag[value='1']").get(0));
-		tag_click($tmp.get(0));
-	})
 
 	$("form[login] input").keypress(function () {
 		if (event.which == 13) {
@@ -321,7 +293,7 @@ $(document).ready(function () {
 		'   <div class="seat_contain">',
 		'     <div class="seat_contain_text">',
 		'       <div class="buy_text_1">最低价</div>',
-		'       <div class="buy_text_2"> <span class="buy_text_2_1">￥</span><span class="buy_text_2_2"></span> </div>',
+		'       <div class="buy_text_2"> <span class="buy_text_2_1">￥</span><span class="buy_text_2_2 pri"></span> </div>',
 		'       <div class="buy_text_3"></div>',
 		'     </div>',
 		'   </div>',
@@ -398,18 +370,133 @@ $(document).ready(function () {
 		return re;
 	}
 
-	function filter() {
-		var $tag = $("#car_type");
-		var $result = $(".search_result");
-		$result = $result.find("[kind_tag=" + )
+	function bind_click(s) {
+		$(s + " .buy_option_slip_left").removeClass("buy_option_slip_left");
+		$(s + " .buy_option_slip_right").removeClass("buy_option_slip_right");
+		$(s + " .seat_contain .active").removeClass("active");
+		$(s + " .available").hover(function () {
+			ob = find_avail(event.target);
+			$(ob).addClass('hover');
+		}, function () {
+			ob = find_avail(event.target);
+			$(ob).removeClass('hover');
+		});
+		$(s + " .buy_text_6").click(function () {
+			ob = event.target;
+			while (!$(ob).hasClass('seat_contain'))
+				ob = ob.parentNode;
+			ob = ob.firstChild;
+			while (!$(ob).hasClass('available'))
+				ob = $(ob).next().get(0);
+			buy_option_resp(ob);
+		});
+		$(s + " .available").click(function () {
+			ob = find_avail(event.target);
+			buy_option_resp(ob);
+		});
+		$(s + " .train_id_info").click(function () {
+			ob = event.target;
+			while (!$(ob).hasClass('ticket_info'))
+				ob = ob.parentNode;
+			$(ob).next().slideToggle(200);
+		});
 	}
+
+	function ticket_sort() {
+		var $sort_list = $("#display_container .search_result");
+		$sort_list.sort(function(a,b) {
+			$key_word = $(".sort_key .tag[value='1']");
+			var ans;
+			if($key_word.attr("id") == "leaving_time")
+			{
+				if($(a).find(".starting_station time").html() < $(b).find(".starting_station time").html())
+					ans = 1;
+				if($(a).find(".starting_station time").html() == $(b).find(".starting_station time").html())
+					ans = 0;
+				if($(a).find(".starting_station time").html() > $(b).find(".starting_station time").html())
+					ans = -1;
+			}
+			if($key_word.attr("id") == "arriving_time")
+			{
+				if($(a).find(".ending_station time").html() < $(b).find(".ending_station time").html())
+					ans = 1;
+				if($(a).find(".ending_station time").html() == $(b).find(".ending_station time").html())
+					ans = 0;
+				if($(a).find(".ending_station time").html() > $(b).find(".ending_station time").html())
+					ans = -1;
+			}
+			if($key_word.attr("id") == "used_time")
+			{
+				var ta = get_time($(a).find(".starting_station time").html(), $(a).find(".ending_station time").html());
+				var tb = get_time($(b).find(".starting_station time").html(), $(b).find(".ending_station time").html());
+				if(ta < tb)
+					ans = 1;
+				if(ta == tb)
+					ans = 0;
+				if(ta > tb)
+					ans = -1;
+			}
+			if($key_word.attr("id") == "price")
+			{
+				if($(a).find(".pri").html() < $(b).find(".pri").html())
+					ans = 1;
+				if($(a).find(".pri").html() == $(b).find(".pri").html())
+					ans = 0;
+				if($(a).find(".pri").html() > $(b).find(".pri").html())
+					ans = -1;
+			}
+			if($("#inc").attr("value") == '1')
+				ans = -ans;
+			return ans;
+		});
+		$("#display_container").append($sort_list);
+	}
+
+	var $all;
+	function filter() {
+		var $tag = $("#car_type .tag[value='1']");
+		var n = $tag.length;
+		$("#display_container").empty();
+		$("#result").empty();
+		if (n == 1 && typeof($tag.attr("all")) != "undefined") {
+			$("#display_container").html($all);
+			bind_click('#display_container');
+			ticket_sort();
+			return;
+		}
+		$("#result").html($all);
+		for (var i = 0; i < n; ++i) 
+			$("#display_container").append($("#result").find("[kind_tag='" + $($tag.get(i)).html() + "']"));
+		bind_click('#display_container');
+		ticket_sort();
+	}
+
+	$("#dec").click(function () {
+		tag_click($("#inc").get(0));
+		tag_click($("#dec").get(0));
+		filter();
+	})
+	$("#inc").click(function () {
+		tag_click($("#inc").get(0));
+		tag_click($("#dec").get(0));
+		filter();
+	})
+
+	$(".sort_key .tag").click(function () {
+		var $tmp = $(event.target);
+		if ($tmp.attr("value") == '1')
+			return;
+		tag_click($(".sort_key .tag[value='1']").get(0));
+		tag_click($tmp.get(0));
+		filter();
+	})
 
 	var flag = 0;
 	$(".search_button").click(function () {
-		$.post("/search", {flag: flag % 3}, function (data) {
+		$.post("/search", { flag: flag % 3 }, function (data) {
 			++flag;
 			var num = data.length;
-			$("#result .search_result").remove();
+			$(".search_result").remove();
 			for (var i = 0; i < num; ++i) {
 				$("#tmp").html(ticket_html1.join(''));
 				$("#tmp .search_result").attr("kind_tag", data[i].kind_tag);
@@ -465,38 +552,8 @@ $(document).ready(function () {
 				}
 				$("#result").append($("#tmp .search_result"));
 			}
-			$("#result .train_info").hide();
-			$("#result .available").hover(function () {
-				ob = find_avail(event.target);
-				$(ob).addClass('hover');
-			}, function () {
-				ob = find_avail(event.target);
-				$(ob).removeClass('hover');
-			});
-			$("#result .buy_text_6").click(function () {
-				ob = event.target;
-				while (!$(ob).hasClass('seat_contain'))
-					ob = ob.parentNode;
-				ob = ob.firstChild;
-				while (!$(ob).hasClass('available'))
-					ob = $(ob).next().get(0);
-				buy_option_resp(ob);
-			});
-			$("#result .available").on("click", function () {
-				try {
-					ob = find_avail(event.target);
-					buy_option_resp(ob);
-				}
-				catch (e) {
-					alert(e.message);
-				}
-			});
-			$("#result .train_id_info").click(function () {
-				ob = event.target;
-				while (!$(ob).hasClass('ticket_info'))
-					ob = ob.parentNode;
-				$(ob).next().slideToggle(200);
-			});
+			$all = $(".search_result");
+			$(".train_info").hide();
 			tag_reset();
 		});
 	})
