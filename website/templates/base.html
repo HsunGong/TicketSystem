@@ -16,7 +16,7 @@
 
 <div class="mask"></div>
 <!--<div style="height: 55px; width: 100%;"></div>-->
-<div class="glass_effect topnav" id="myTopnav">
+<div class="topnav" id="myTopnav" pagename="{% if page and page == 'home' %}home{% endif %}{% if page and page == 'search' %}search{% endif %}">
   <a href="/home" class="{% if page and page == 'home' %}active{% endif %}"><i class="material-icons" style="position: relative; top: 6px;">home</i></a>
   <a href="/search"class="{% if page and page == 'search' %}active{% endif %}"><i class="material-icons" style="position: relative; top: 6px;">search</i></a>
   <a href="javascript:void(0)"class="{% if page and page == 'login' %}active{% endif %}" style="float: right" id="user_button"><i class="material-icons" style="position: relative; top: 6px;">person</i><span id="user_name"></span></a>
@@ -85,6 +85,33 @@
     </div>
     </form>
     <div class="login_button" style="margin-top: -5px" id="register_button2">注册</div>
+  </div>
+</div>
+<div class="user_menu glass_effect">
+  <div class="user_menu_container">
+    <div class="user_bar">
+      <i class="material-icons shrink_button">chevron_right</i>
+      <div class="uid_disp">UID:<span id="UID">2018</span></div>
+    </div>
+    <div class="menu">
+        <div class="option">
+          <i class="material-icons">account_box</i>
+          <div class="menu_text">个人资料</div>
+        </div>
+        <div class="option">
+          <i class="material-icons">directions_railway</i>
+          <div class="menu_text">购票记录</div>
+          <span class="badge" style="float:right">9</span> 
+        </div>
+        <div class="option">
+          <i class="material-icons">file_copy</i>
+          <div class="menu_text">数据管理</div>
+        </div>
+        <div class="option">
+          <i class="material-icons">exit_to_app</i>
+          <div class="menu_text">登出</div>
+        </div>
+    </div>
   </div>
 </div>
 

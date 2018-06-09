@@ -1,6 +1,39 @@
 {% extends "base.html" %}
 {%block content%}
-<div style>
-
+<div style="max-width: 1000px; margin-left: auto; margin-right: auto; margin-top: 80px">
+  <div class="glass_effect search_window" style="margin-bottom: 7px; max-width: 500px">
+    <div class="search_mask">
+      <h2>你是谁？</h2>
+      <br>
+        <div style="flex: 1 1 auto">
+          <div class="input_block">
+            <label>UID</label>
+              <div class="glass_effect">
+                <input type="text" value="2018" readonly>
+              </div>
+            <br>
+            <label>名字</label>
+              <div class="glass_effect">
+                <input type="text" placeholder="名字">
+              </div>
+            <br>
+            <label>邮箱</label>
+              <div class="glass_effect">
+                <input type="text" placeholder="邮箱">
+              </div>
+            <br>
+            <label>手机</label>
+              <div class="glass_effect">
+                <input type="text" placeholder="手机">
+              </div>
+            <br>
+            <label>密码</label>
+              <div>
+                <input type="text" placeholder="密码">
+              </div>
+            </div>
+          </div>
+        </div>
+  </div>
 </div>
 {%endblock%}

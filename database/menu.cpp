@@ -11,7 +11,7 @@ struct cmp {
 	template<class Key>
 	bool operator ()(const Key &a, const Key &b)const { return a.x > b.x; }
 };
-#define mysize 500
+#define mysize 11 
 int p[mysize];
 void swap(int &a, int&b) {
 	int c;
@@ -34,6 +34,7 @@ int main() {
 	const char b[] = "datafile";
 	db mydb(a, b);
 	map<int, long long> m;
+	mydb.clear();
 	//ofstream out("testfile");
 	//out.close();
 	//fstream file("testfile");
@@ -43,6 +44,7 @@ int main() {
 	for (int32_t i = 0; i < mysize; ++i) {
 		k = p[i];
 		//k = 100 - i;
+		printf("insert:%d %d\n", k, i);
 		mydb.insert(k, i);		
 		m.insert(pair<int, long long>(k, i));
 
@@ -54,30 +56,33 @@ int main() {
 			cout << " map " << it->second << '\n';
 		}
 	}
+
 	for (int32_t i = 0; i < mysize; ++i) {
 		k = p[i];
 		tmp = mydb.find(k);
 		it = m.find(k);
 		//cout << *tmp << " and " << it->second << '\n';
 		if (*tmp != it->second) {
+			tmp = mydb.find(k);
 			cout << i << " find  " << *tmp;
 			cout << " map " << it->second << '\n';
 		}
 	}
 
 
-	for (int32_t i = 0; i < 300; ++i) {
-		k = p[i];
-		mydb.modify(k, k);
-		m[k] = k;
-		tmp = mydb.find(k);
-		it = m.find(k);
-		//cout << *tmp << " and " << it->second << '\n';
-		if (*tmp != it->second) {
-			cout << i << " find  " << *tmp;
-			cout << " map " << it->second << '\n';
-		}
-	}cout << endl;
+	//for (int32_t i = 0; i < 300; ++i) {
+	//	k = p[i];
+	//	mydb.modify(k, k);
+	//	m[k] = k;
+	//	tmp = mydb.find(k);
+	//	it = m.find(k);
+	//	//cout << *tmp << " and " << it->second << '\n';
+	//	if (*tmp != it->second) {
+	//		tmp = mydb.find(k);
+	//		cout << i << " find  " << *tmp;
+	//		cout << " map " << it->second << '\n';
+	//	}
+	//}cout << endl;
 	//tmp = mydb.begin();
 	//it = m.begin();
 	//for (int32_t i = 0; i < mysize; ++i) {
@@ -89,11 +94,20 @@ int main() {
 	//	++it;
 	//}cout << endl;
 
-	int er = mysize;
+
+	printf("---------erase---------\n");
+
+	int er = mysize / 2;
 	for (int32_t i = 0; i < er; ++i) {
 		k = p[i];
-		mydb.erase(k);
-		m.erase(k);
+		it = m.find(k);
+		if (it != m.end()) {
+			m.erase(k);
+			mydb.erase(k);
+		}
+		else {
+			cout << i << '\n';
+		}
 	}cout << endl;
 
 	for (int32_t i = er; i < mysize; ++i) {
@@ -102,10 +116,14 @@ int main() {
 		it = m.find(k);
 		//cout << *tmp << " and " << it->second << '\n';
 		if (*tmp != it->second) {
+			tmp = mydb.find(k);
 			cout << i << " find  " << *tmp;
 			cout << " map " << it->second << '\n';
 		}
 	}cout << endl;
+
+
+	mydb.clear();
 	return 0;
 }
 

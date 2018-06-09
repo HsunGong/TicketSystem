@@ -1,28 +1,23 @@
 #pragma once
 
-#ifndef DATABASE_H
-#define DATABASE_H
-
 #include <iostream>
+#include <cstdio>
 #include <fstream>
 #include <utility>
-//#include <cmath>
-using namespace std;
 
-//typedef unsigned long long uintmax_t
-//typedef long long _int64_t
-//typedef unsigned long long _uint64_t;
-typedef int int32_t;
+using namespace std;
+typedef int int32_t;// cant use unsigned!!! because: i-- and i>= 0 will wrong
+
 #pragma region class exception
 
 class errors {};
-
 class file_error : public errors { };
 //class index_out : public errors { };
 class repetition : public errors { };
 class not_exist : public errors { };
 class out_of_bound : public errors { };
 class node_full : public errors { };
+
 #pragma endregion
 
 // if use template<char const * file>have to define file like:
@@ -36,13 +31,12 @@ inline constexpr int32_t half(const int32_t &pos) noexcept {// with ceil()
 	else return pos / 2 + 1;
 }
 
-template<class T>
+template<class Key, class V>//figure out can fugure idx and datanode
 inline constexpr int32_t figure_size() noexcept {
-	int32_t size1 = sizeof(int32_t) * 3 + sizeof(int32_t) * 2 + sizeof(bool);
+	int32_t size1 = sizeof(int32_t) * 4;
 	int32_t left = bits - size1;
-	return left / (sizeof(T) + sizeof(int32_t));
+	return left / (sizeof(Key) + sizeof(V));
 }
-
 
 
 template<class Key, class V, class Compare = std::less<Key>> 
@@ -63,7 +57,6 @@ private:
 	// write --- read
 	fstream idx;
 	fstream data;
-	
 	
 	Compare cmp;// cmp(k, key[ss]), k < key[ss] then s.t.
 	const char *idxfile;//const char idxfile[fileNameSize];
@@ -106,8 +99,8 @@ private:
 		int32_t size = 1;
 		int32_t pos = 0;
 
-		Key key[figure_size<Key>()];
-		int32_t son[figure_size<Key>()] = { 0 };
+		Key key[figure_size<Key, int32_t>()];
+		int32_t son[figure_size<Key, int32_t>()] = { 0 };
 
 		// can be optimized
 		// type == 1 last level; type == 0, not last level
@@ -115,7 +108,7 @@ private:
 
 	public:
 		idxNode() { }
-		idxNode(const int32_t pos, const int32_t size, const int32_t type) { }
+		idxNode(const int32_t pos, const int32_t size, const int32_t type):pos(pos), size(size), type(type) { }
 		idxNode(int status)  {
 			if (status == 0) {
 				//init root
@@ -123,6 +116,7 @@ private:
 				pos = 1;
 				type = 1;//means it is the last level
 				size = 1;
+				son[0] = 1;//init
 			}
 		}
 		~idxNode() = default;
@@ -150,8 +144,8 @@ private:
 
 		int32_t left = 0, right = 0;
 
-		Key key[figure_size<V>()];
-		V data[figure_size<V>()];
+		Key key[figure_size<V, Key>()];
+		V data[figure_size<V, Key>()];
 
 	public:
 
@@ -182,13 +176,12 @@ private:
 	// in the faNode, but not add in the file
 	// have to judge all things outside
 	// and suppose no repetition
-	void add(idxNode &x, const Key &k, const int32_t son_pos) {
+	void add(idxNode &x, const Key &k, const int32_t son_pos, bool flag = 0) {
 		if (x.size == idxSize) throw node_full();
 
 		int32_t i;
-		for (i = 1; i < x.size; ++i)
+		for (i = flag ? 0 : 1; i < x.size; ++i)// to prevent i = 0 can also insert
 			if (cmp(k, x.key[i])) break;
-		//if (i == size) i = 1;
 
 		for (int32_t j = x.size; j > i; --j) {
 			x.key[j] = x.key[j - 1];
@@ -203,17 +196,14 @@ private:
 
 	//no writing
 	//no judging merge or adopt
-	void del(idxNode &x, const Key &k, const int32_t num) {
+	//judge delpos ouotside
+	void del(idxNode &x,  const int32_t pos) {
 		if (x.size == 0) throw not_exist();
-
-		//way
-		int32_t i;
-		for (i = 1; i < x.size; ++i)
-			if (!cmp(k, x.key[i]) && !cmp(x.key[i], k)) break;
-
 		--x.size;
-		for (int32_t j = i; j < x.size; ++j) 	x.key[j] = x.key[j + 1];
-		for (i = num; i < x.size; ++i) x.son[i] = x.son[i + 1];
+		for (int32_t i = pos; i < x.size; ++i) {
+			x.key[i] = x.key[i + 1];
+			x.son[i] = x.son[i + 1];
+		}
 		return;
 	}
 
@@ -331,7 +321,7 @@ public:
 			if (now.pos == 0) throw out_of_bound();
 			return now.data[cur];
 		}
-		V *operator->() const noexcept { return &(now.data[cur]); }
+		V *operator->() noexcept { return &(now.data[cur]); }
 		void write(){ (*mine).write(now); }
 
 		bool operator==(const iterator &rhs) const {
@@ -365,9 +355,10 @@ private:
 	}
 
 	// if cant't find cur key, return the next pair which s.t. key[] >= k
-	pair<bool, iterator> pfind(const Key &k, idxNode cur) {
+	//but here only return datanode, which is no use
+	int32_t pfind(const Key &k, idxNode cur) {
 		if (empty()) {
-			return pair<bool, iterator>(0, end());
+			return  0;
 		}
 
 		int32_t i;
@@ -375,18 +366,8 @@ private:
 			if (cur.type == 1) {// next is leaf
 				for (i = cur.size - 1; i > 0; --i)
 					if (!cmp(k, cur.key[i])) break;
-
-				dataNode leaf;
-				read(cur.son[i], leaf);
-				//way 
-				for (i = leaf.size - 1; i >= 0 ; --i)
-					if (!cmp(k, leaf.key[i])) 
-						return pair<bool, iterator>(1, iterator(this, leaf, i));
-				//way can be optimized by binary search
-
-				if(leaf.right) read(leaf.right, leaf);
-				else leaf = tail;
-				return pair<bool, iterator>(0, iterator(this, leaf, 0));
+				return cur.son[i];
+				
 			}
 			//type == 0, not the last level idxnode
 
@@ -448,21 +429,22 @@ private:
 		//split
 		idxNode newNode;// newNode is hte same level of dataNode
 		int32_t i;
-		for (i = cur.size - 1; i > 0; ++i)
+		for (i = cur.size - 1; i > 0; --i)///!!!!!!!,for what ? --i not ++i, but can figure out the problem because break;
 			if (!cmp(k, cur.key[i])) break;
 
 		Key tmp;//tmp is the key between old and newnode
 		int32_t mid = hidxSize;
-		if (i + 1 <= mid) { //half dont need
+		if (i + 2 <= mid) { ///half dont need, for what? i + 1 is not enough, mid means the 1st half node size;
 			mid = mid - 1;
 			tmp = cur.key[mid];
 			split(mid, cur, newNode);
 			add(cur, k, son_pos);
 		}
 		else {
-			tmp = cur.key[mid];
+			if (cmp(k, cur.key[mid])) tmp = k;///for what?  maybe k is even smaller than keymid, so add is not allowed,???maybe not necessary
+			else tmp = cur.key[mid];
 			split(mid, cur, newNode);
-			add(newNode, k, son_pos);
+			add(newNode, k, son_pos, 1);
 		}
 		//newNode always larger than curnode
 		write(newNode);
@@ -500,7 +482,6 @@ private:
 
 		cur.right = _last_data;//newNode pos
 		_new.left = cur.pos;
-
 		return;
 	}
 
@@ -550,32 +531,13 @@ private:
 	pair<Key, int32_t> pinsert(const Key &k, const V &val, int32_t _cur) {
 		idxNode cur;
 		read(_cur, cur);
-
+		//read(1, root);
 		int32_t i;
 		for (i = cur.size - 1; i > 0; --i)
 			if (!cmp(k, cur.key[i])) break;
 
 		pair<Key, int32_t> p;
-		if (cur.type == 1) {
-			if (cur.size == 1) {//default is has node, but dont has son
-				///maybe never happen???
-				cur.pos = _cur = ++_last_idx;
-				dataNode tmp(k, val, ++_last_data);
-				dataNode tmp2;
-				tmp2.pos = ++_last_data;
-				cur.son[0] = tmp2.pos;
-				cur.son[1] = tmp.pos;
-				cur.key[1] = k;
-				p.first = k;
-				p.second = 0;
-
-				write(tmp);
-				write(tmp2);
-				write(cur);
-				return p;
-			}
-			else p = addData(k, val, cur.son[i]);
-		}
+		if (cur.type == 1)  p = addData(k, val, cur.son[i]);
 		else 	p = pinsert(k, val, cur.son[i]);
 
 		if (p.second) p = addIdx(p.first, p.second, cur);// once p.second == 0, all of the recursive functions.second == 0
@@ -585,36 +547,88 @@ private:
 
 	}
 
-	//the right side node always remains,which means dont care about tail if merge
-	void merge(dataNode &_del, dataNode &_left) {
-		int32_t i, j;/// int32_t --- always >= 0
-		for (i = _left.size - 1, j = _del.size + _left.size - 1; i >= 0; --i, --j) {
-			_left.key[j] = _left.key[i];
-			_left.data[j] = _left.data[i];
+
+	void merge(idxNode &remain, idxNode &del, const Key &k) {
+		int32_t j, i;
+		for (i = 0, j = remain.size; i < del.size; ++i, ++j) {
+			remain.key[j] = del.key[i];
+			remain.son[j] = del.son[i];
 		}
-
-		for (i = 0; i < _del.size; ++i) {
-			_left.key[i] = _del.key[i];
-			_left.data[i] = _del.data[i];
-		}
-
-		_left.left = _del.left;
-		if (_del.left) {
-			dataNode tmp;
-			read(_del.left, tmp);
-			tmp.right = _left.pos;
-			write(tmp);
-		}
-
-
-		_left.size += _del.size;
+		remain.key[remain.size] = k;
+		remain.size += del.size;
+		del.size = 0;//do it later than the sentence below
 		return;
 	}
+	pair<Key, int32_t> delIdx(const int32_t delpos, int32_t _neighbor, idxNode &cur, const bool left, const Key &_k) {
+		del(cur, delpos);
 
-	pair<Key, int32_t> delData(const Key &k, const int32_t &_neighborpos, const int32_t &_cur, const bool &left) {
-		--allsize;
+		if (cur.pos == 1) {// maybe for root
+			write(cur);
+			return pair<Key, int32_t>(cur.key[0], 0);
+		}
+		if (cur.size >= hidxSize) {
+			write(cur);
+			return pair<Key, int32_t>(cur.key[0], 0);
+		}
+
+		idxNode neighbor;
+		read(_neighbor, neighbor);
+		if (left) {
+			if (neighbor.size > hidxSize) {
+				--neighbor.size;
+				//add(cur, _k, neighbor.son[neighbor.size], 1);----wrong code
+				//for: _k may== neighbor.key[0] then can add(); 
+				//add function:
+				//     |--[key]--|
+				//              son
+				//here adopt from left sib
+				//     |--[key]--|
+				//    son
+				//way1:
+				cur.key[0] = _k;
+				add(cur, neighbor.key[neighbor.size], neighbor.son[neighbor.size], 1);
+				//way2
+				//for(i = 0; i < cur.size; ++i) cur.son[i+1] = cur.son[i], cur.key[i+1] = cur.key[i];
+				//cur.key[1] = _k; cur.son[0] = neighbor.son[neighbor.size];
+				write(cur);
+				write(neighbor);
+				return pair<Key, int32_t>(neighbor.key[neighbor.size], 1);
+			}
+			else {//delete cur
+				merge(neighbor, cur, _k);
+				write(neighbor);
+				return pair<Key, int32_t>(neighbor.key[0], 2);//key is useless
+			}
+		}
+		else {
+			if (neighbor.size > hidxSize) {
+				cur.key[cur.size] = _k;
+				cur.son[cur.size] = neighbor.son[0];
+				++cur.size;
+				del(neighbor, 0);
+				write(cur);
+				write(neighbor);
+				return pair<Key, int32_t>(neighbor.key[0], 3);
+			}
+			else {//delete neighbor
+				merge(cur, neighbor, _k);
+				write(cur);
+				return pair<Key, int32_t>(neighbor.key[0], 4);//key is useless
+			}
+		}
+	}
+	void merge(dataNode &remain, dataNode &del) {
+		int32_t i, j;
+		for (i = 0, j = remain.size; i < del.size; ++i, ++j) {
+			remain.key[j] = del.key[i];
+			remain.data[j] = del.data[i];
+		}
+		remain.size += del.size;
+		del.size = 0;
+		return;
+	}
+	pair<Key, int32_t> delData(const Key &k, int32_t _neighbor, int32_t _cur, const bool left) {
 		dataNode cur;
-
 		read(_cur, cur);
 
 		int32_t i;
@@ -622,70 +636,50 @@ private:
 			if (!cmp(k, cur.key[i]) && !cmp(cur.key[i], k)) break;
 		if (i == cur.size) throw not_exist();
 
+		--allsize;
 		_tmpPosinTree = cur.pos;
 		_tmpPosinNode = del(cur, i);
 
 		if (cur.size >= hdataSize) {
 			write(cur);
-			return pair<Key, int32_t>(cur.key[0], 0);
+			return pair<Key, int32_t>(cur.key[0], 0);//key is useless
 		}
+
 		dataNode neighbor;
-		read(_neighborpos, neighbor);
+		read(_neighbor, neighbor);
 		if (left) {
 			if (neighbor.size > hdataSize) {
-				add(cur, neighbor.key[neighbor.size - 1], neighbor.data[neighbor.size - 1]);
 				--neighbor.size;
+				add(cur, neighbor.key[neighbor.size], neighbor.data[neighbor.size]);
 				write(cur);
 				write(neighbor);
-				return pair<Key, int32_t>(cur.key[0], 1);
+				return pair<Key, int32_t>(neighbor.key[neighbor.size], 1);
 			}
+			else {
+				merge(neighbor, cur);
 
-			merge(neighbor, cur);
-			write(cur);
-
-			return pair<Key, int32_t>(cur.key[0], 2);
+				write(neighbor);
+				return pair<Key, int32_t>(neighbor.key[neighbor.size], 2);//key is useless
+			}
 		}
-		else {// right, and dont have left sibling
+		else {
 			if (neighbor.size > hdataSize) {
-				add(cur, neighbor.key[0], neighbor.data[0]);
+				cur.data[cur.size] = neighbor.data[0];
+				cur.key[cur.size] = neighbor.key[0];
+				++cur.size;
 				del(neighbor, 0);
-
 				write(cur);
 				write(neighbor);
 				return pair<Key, int32_t>(neighbor.key[0], 3);
 			}
-
-			merge(cur, neighbor);
-			write(neighbor);
-
-			return pair<Key, int32_t>(neighbor.key[0], 4);
+			else {
+				merge(cur, neighbor);
+				write(cur);
+				return pair<Key, int32_t>(neighbor.key[0], 4);//key is useless
+			}
 		}
 	}
-	//del always be left!
-
-	void merge(idxNode &_del, idxNode &_left, const Key &k) {
-		//dataNode tmp;
-		//read(pbegin(_left.son[0]), tmp);
-		//Key k = tmp.key[0];
-		int32_t i, j;
-		for (i = _left.size - 1, j = _del.size + _left.size - 1; j >= _del.size; --i, --j) {
-			_left.key[j] = _left.key[i];
-			_left.son[j] = _left.son[i];
-		}		
-		for (i = 0; i < _del.size; ++i) {
-			_left.key[i] = _del.key[i];
-			_left.son[i] = _del.son[i];
-		}
-		_left.key[_del.size] = k;
-		
-		_left.size += _del.size;
-		
-		return;
-	}
-
-	//perase dont care about return key??
-	//tmpk is the key between neighbor and cur, which inherit from father
-	pair<Key, int32_t> perase(const Key &k, int32_t _neighbor, int32_t _cur, bool left, const Key &tmpk) {
+	pair<Key, int32_t> perase(const Key &k, int32_t _neighbor, int32_t _cur, bool left, const Key &_k) {
 		idxNode cur;
 		read(_cur, cur);
 
@@ -693,98 +687,36 @@ private:
 		for (i = cur.size - 1; i >= 0; --i)
 			if (!cmp(k, cur.key[i])) break;
 
-		pair<Key, int32_t> p;
+		pair<Key, int32_t> p;//1 -->adopt from left, 3 -->adopt from right, 0 nothing, 2 merge from left, 4 merge from right
 		if (cur.type == 1) {
-			//if inavailable for siblings, pos = 0;
-			if (i > 0) p = delData(k, cur.son[i - 1], cur.son[i], 1);// must left
-			else  p = delData(k, cur.son[i + 1], cur.son[i], 0);//must right
+			if (i > 0) p = delData(k, cur.son[i - 1], cur.son[i], 1);
+			else p = delData(k, cur.son[i + 1], cur.son[i], 0);
 		}
-		else {//root type = 0
-			if (i > 0) p = perase(k, cur.son[i - 1], cur.son[i], 1, cur.key[i]);// must left
-			else  p = perase(k, cur.son[i + 1], cur.son[i], 0, cur.key[i + 1]);//must right
+		else {
+			if (i > 0) p = perase(k, cur.son[i - 1], cur.son[i], 1, cur.key[i]);
+			else p = perase(k, cur.son[i + 1], cur.son[i], 0, cur.key[i + 1]);
 		}
 
-		//change1:
-		// 1, 3, 4 after changing , directingly delete
-		// dont delete, but merge first,
+
 		switch (p.second) {
+		case 0:
+			return p;
 		case 1:
 			cur.key[i] = p.first;
-			break;
-		case 2:
-			del(cur, cur.key[i], i - 1);// have to divide 2 things
-			break;
+			p.second = 0;
+			write(cur);
+			return p;
 		case 3:
 			cur.key[i + 1] = p.first;
-			break;
-		case 4:
-			del(cur, cur.key[i + 1], i);// have to divide 2 things
-			break;
-		default:
-			//if (p.second == 0 || p.second == 1 || p.second == 3)
-			//write(cur);
-			return pair<Key, int32_t>(cur.key[1], 0);// dont have to change key value
-		}
-
-		// pirated of delnode, just like it,,,, delidx
-		if (cur.size >= hidxSize) return pair<Key, int32_t>(cur.key[1], 0);
-
-		idxNode neighbor;
-		read(_neighbor, neighbor);
-		if (left) {
-			if (neighbor.size > hidxSize) {
-				//dataNode tmp;
-				//read(pbegin(cur.son[0]), tmp);
-
-				//cur.add(neighbor.key[neighbor.size - 1], neighbor....);
-				//add overwrite
-				//all move backaward 1 step
-				//for (int32_t j = cur.size; j > 0; --j) {
-				//	cur.key[j] = cur.key[j - 1];
-				//	cur.son[j] = cur.son[j - 1];
-				//}
-				//cur.key[1] = tmpk;
-				//cur.son[0] = neighbor.son[neighbor.size - 1];
-				//++cur.size;
-				add(cur, tmpk, neighbor.son[neighbor.size - 1]);
-				//Key _tmpk = neighbor.key[neighbor.size - 1];
-				
-				--neighbor.size;
-
-				write(cur);
-				write(neighbor);
-				return pair<Key, int32_t>(neighbor.key[neighbor.size], 1);
-			}
-
-			merge(neighbor, cur, tmpk);
+			p.second = 0;
 			write(cur);
-
-			//dataNode tmp;
-			//read(pbegin(cur.son[0]), tmp);
-			//return pair<Key, int32_t>(tmp.key[0], 2);
-			return pair<Key, int32_t>(neighbor.key[1], 2);//useless
-		}
-		else {// right, and dont have left sibling
-			if (neighbor.size > hidxSize) {
-				//dataNode tmp;
-				//read(pbegin(neighbor.son[0]), tmp);
-
-				//all move forward 1 step
-				cur.key[cur.size] = tmpk;
-				cur.son[cur.size] = neighbor.son[neighbor.size - 1];
-				++cur.size;
-				Key _tmpk = neighbor.key[1];
-				del(neighbor, neighbor.key[1], 0);
-
-				write(cur);
-				write(neighbor);
-				return pair<Key, int32_t>(_tmpk, 3);
-			}
-
-			merge(cur, neighbor, tmpk);
-			write(neighbor);
-
-			return pair<Key, int32_t>(neighbor.key[1], 4);
+			return p;
+		case 2:
+			return delIdx(i, _neighbor, cur, left, _k);
+		case 4:
+			return delIdx(i + 1, _neighbor, cur, left, _k);
+		default:
+			throw not_exist();
 		}
 	}
 
@@ -793,29 +725,38 @@ public:
 	//	means root.pos = 1, read root : seekg(1 * bits, ios::beg);
 
     database(const char *a, const char *b): idxfile(a), datafile(b),
-		idxSize(figure_size<Key>()), dataSize(figure_size<V>())
+		idxSize(figure_size<Key, int32_t>()), dataSize(figure_size<Key, V>())
 		, hdataSize(half(dataSize)), hidxSize(half(idxSize)){
 
         ifstream in(idxfile);//read
 		if (!in) {
-			ofstream out(datafile, ios::binary | ios::out);		
+			ofstream out(datafile);		
 			if (!out) throw file_error();
 			out.close();
-
 			out.open(idxfile);
 			if (!out) throw file_error();
-			root = idxNode(0);
-			write(root);
 			out.close();
-
-			//root
-			_last_data = 0;// init with data has no nodes
-			_last_idx = 1;// init with data has 1 node(root)
-			allsize = 0;
-			tail.left = 0;
 
 			idx.open(idxfile, ios::binary | ios::in | ios::out);
 			data.open(datafile, ios::binary | ios::in | ios::out);
+			//root
+			_last_data = 1;// init with data has no nodes
+			_last_idx = 1;// init with data has 1 node(root)
+			allsize = 0;
+
+			root = idxNode(0);
+			dataNode tmp;
+			tmp.pos = 1;
+			tail.left = 1;
+
+			write(tmp);
+			write(root);
+			//write(root);
+			//data.seekp(0);
+			//data.write(reinterpret_cast<char*>(&_last_idx), sizeof(int32_t));
+			//data.write(reinterpret_cast<char*>(&_last_data), sizeof(int32_t));
+			//data.write(reinterpret_cast<char*>(&allsize), sizeof(int32_t));
+			//data.write(reinterpret_cast<char*>(&tail.left), sizeof(int32_t));
 		}
 		else {
 			in.close();
@@ -832,6 +773,8 @@ public:
 			data.read(reinterpret_cast<char*>(&tail.left), sizeof(int32_t));			
 
 			read(1, root);
+			//cout << 1 << '\n';
+
 		}
     }
 
@@ -861,12 +804,22 @@ public:
 		idx.open(idxfile, ios::binary | ios::in | ios::out);
 		data.open(datafile, ios::binary | ios::in | ios::out);
 
-		root = idxNode(0);
-		write(root);
-		_last_data = 0;
+		_last_data = 1;//init with one dataNode
 		_last_idx = 1;
 		allsize = 0;
-		tail.left = 0;
+
+		dataNode tmp;
+		tmp.pos = 1;
+		tail.left = 1;
+		
+		root = idxNode(0);
+		write(root);
+		write(tmp);
+		//data.seekp(0);
+		//data.write(reinterpret_cast<char*>(&_last_idx), sizeof(int32_t));
+		//data.write(reinterpret_cast<char*>(&_last_data), sizeof(int32_t));
+		//data.write(reinterpret_cast<char*>(&allsize), sizeof(int32_t));
+		//data.write(reinterpret_cast<char*>(&tail.left), sizeof(int32_t));
 	}
 
 	bool empty() {
@@ -884,12 +837,23 @@ public:
 	//}
 	iterator find(const Key &k) {
 		read(1, root);
-		return pair<bool, iterator>(pfind(k, root)).second;
+		int32_t _pos = pfind(k, root);
+		if (_pos == 0) return end();
+		dataNode leaf;
+		read(_pos, leaf);
+		//way 
+		size_t i;
+		for (i = leaf.size - 1; i >= 0; --i)
+			if (!cmp(k, leaf.key[i]))
+				return iterator(this, leaf, i);
+		//way can be optimized by binary search
+
+		if (leaf.right) read(leaf.right, leaf);
+		else leaf = tail;
+		return iterator(this, leaf, 0);
 	}
 
 	iterator begin() {
-		/*if (empty()) throw not_exist();
-		return iterator(this, head, 0);*/
 		if (empty()) return end();
 		
 		int32_t cur = pbegin(1);
@@ -903,32 +867,13 @@ public:
 	// while split node, new node always inherit the larger part
 	// while merge node, old (the one left)node always inherit the smaller part
 	iterator insert(const Key &k, const V &val) {
-
-		if (empty()) {
-			++root.size;
-			++allsize;
-			root.key[1] = k;
-			root.son[1] = ++_last_data;
-			dataNode tmp(k, val, _last_data);
-			root.son[0] = ++_last_data;
-			dataNode tmp2;
-			tmp2.pos = _last_data;
-			tmp2.right = tmp.pos;
-			tmp.left = tmp2.right;
-
-			tail.left = tmp.pos;
-			write(tmp2);
-			write(tmp);
-			write(root);
-			return iterator(this, tmp, 0);
-		}
-
 		pair<Key, int32_t> p = pinsert(k, val, 1);
+
 
 		//split a new node with root level
 		if (p.second) {//return newnode pos
 			read(1, root);// may change the values
-			idxNode _newroot(0, 2, 1);
+			idxNode _newroot(1, 2, 0);
 			++_last_idx;// which may be the pos of old root
 
 			_newroot.son[0] = root.pos = _last_idx;
@@ -949,60 +894,31 @@ public:
 		if (empty()) throw not_exist();
 
 		read(1, root);
-		if (root.type && root.size == 2) {
+		if (root.size == 1) {//special
+			--allsize;
 			dataNode tmp;
-			if (cmp(k, root.key[1])) read(root.son[0], tmp);
-			else read(root.son[1], tmp);
+			read(root.son[0], tmp);
 			int32_t i;
-			for (i = 0; i < tmp.size; ++i)
+			for ( i = 0; i < tmp.size; ++i)
 				if (!cmp(k, tmp.key[i]) && !cmp(tmp.key[i], k)) break;
-			if (tmp.size == i) throw not_exist();
-			_tmpPosinTree = tmp.pos;
+			if (i == tmp.size) throw not_exist();
 			_tmpPosinNode = del(tmp, i);
 			write(tmp);
-			return iterator(this, _tmpPosinTree, _tmpPosinNode);
-		}
-		//way
-		int32_t i;
-		for (i = root.size - 1; i > 0; --i)
-			if (!cmp(k, root.key[i])) break;
-
-		pair<Key, int32_t> p;
-		if (root.type == 1) {//if inavailable for siblings, pos = 0;		
-			if (i > 0) p = delData(k, root.son[i - 1], root.son[i], 1);// must left
-			else  p = delData(k, root.son[i + 1], root.son[i], 0);//must right
-		}
-		else {//root type = 0
-			if (i > 0) p = perase(k, root.son[i - 1], root.son[i], 1, root.key[i]);// must left
-			else  p = perase(k, root.son[i + 1], root.son[i], 0, root.key[i + 1]);//must right
+			return iterator(this, tmp, _tmpPosinNode);
 		}
 
-		//for p.first == 1, 3; adopt son then the key may be change,so for secure, must change the key; only for 0, dont need
-		switch (p.second) {
-		case 1:
-			root.key[i] = p.first;
-			break;
-		case 2:// i is the key between i - 1 and i		
-			del(root, root.key[i], i - 1);// have to divide 2 things
-			break;
+		pair<Key, int32_t> p = perase(k, 0, 1, 1, Key());
 
-		//i == 0
-		case 3:
-			root.key[i + 1] = p.first;
-			break;
-		case 4:
-			del(root, root.key[i + 1], i);// have to divide 2 things
-			break;
-		}
-
-		if (root.type == 0 && root.size == 1) {
-			read(root.son[1], root);// for some rule, the right son will always remain
+		read(1, root);
+		if (root.size == 1 && root.type == 0) {
+			read(root.son[0], root);
 			root.pos = 1;
+			write(root);
 		}
-
-		write(root);
 		return iterator(this, _tmpPosinTree, _tmpPosinNode);
 	}
+
+
 	iterator erase(const Key &k, const V &val) {
 		iterator tmp = find(k);
 		if (*tmp != val) throw not_exist();
@@ -1033,170 +949,5 @@ public:
 
 };
 
-#endif
-
-//278 char file[fileNameSize] = '\0';
-//279 fstream data;///?, conflict??
 
 
-//void pbegin() {
-//	if (empty()) throw not_exist();
-//	idxNode cur = root;
-
-//	while (true) {
-//		if (cur.type == 1) {// next is leaf
-//			data.seekg(cur.son[0] * bits);
-//			data.read(reinterpret_cast<char*>(&head), sizeof(dataNode));
-//			if (head.size == 0) cerr << "return head error\n";
-//			_min_key = head.key[0];
-//			return;
-//		}
-//	
-//		//type == 0, not the last level idxnode
-//		idx.seekg(cur.son[0] * bits);
-//		idx.read(reinterpret_cast<char*>(&cur), sizeof(idxNode));
-//	}
-//}
-
-
-
-/*
-dataNode addData(dataNode &cur, const Key &k, const V &val, int32_t &cur_in_data) {
-if (cur->size < dataSize) {  //dont split dataNode ,also dont split idxNode
-cur_in_data = _node.add(k, v);
-data.seekp(cur->pos*bits);
-data.write(reinterpret_cast<char*>(&*cur), sizeof(dataNode));
-
-return cur;
-}
-else if(cur.size != dataSize) cerr << "addDataNode Error\n";
-
-++_last_data;
-
-int32_t i;
-int32_t hidxSize = cur.size / 2;
-dataNode newNode, tmp;
-newNode.size = cur.size;
-for (i = hidxSize; i < newNode.size; ++i) {
-newNode.key[i - hidxSize] = cur.key[i];
-newNode.data[i - hidxSize] = cur.data[i];
---cur.size;
-}
-newNode.fa = cur.fa;
-newNode.size = newNode.size - cur.size;
-newNode.pos = _last_data;
-
-if (!cmp(k, newNode.key[0])) newNode.add(k, val);
-else cur.add(k, val);
-
-data.seekg(cur.right*bits);
-data.read(reinterpret_cast<char*>(&tmp), sizeof(dataNode));
-newNode.right = cur.right;
-tmp.left = _last_data;
-data.seekp(tmp.pos*bits);
-data.write(reinterpret_cast<char*>(&tmp), sizeof(dataNode));
-
-cur.right = _last_data;//newNode pos
-newNode.left = cur.pos;
-data.seekp(cur.pos*bits);
-data.write(reinterpret_cast<char*>(&cur), sizeof(dataNode));
-
-data.seekp(newNode.pos*bits);
-data.write(reinterpret_cast<char*>(&newNode), sizeof(dataNode));
-
-return newNode;
-}
-*/
-
-// if dont split return cur as pefore
-// else split cur
-// return new idxNode's pos, and representative key!!??
-//dont care fa
-//int32_t addIdx(Key &_newKey, idxNode &cur, const Key &son_k, const int32_t &son_pos) {
-//	if (cur.size < idxSize) {
-//		cur.add(son_k, son_pos);
-//		idx.seekp(cur.pos*bits);// or cur_fa.pos*bits
-//		idx.write(reinterpret_cast<chra*>(&cur), sizeof(idxNode));
-//		return cur.pos;
-//	}
-//	else if (cur.size != idxSize) cerr << "addidxNode Error\n";
-
-//	++_last_idx;
-
-//	int32_t i;
-//	int32_t hidxSize = cur.size / 2;
-//	idxNode newNode, tmp;
-//	newNode.size = cur.size;
-
-//	for (i = hidxSize; i < newNode.size; ++i) {
-//		newNode.key[i - hidxSize] = cur.key[i];
-//		newNode.son[i - hidxSize] = cur.son[i];
-//		--cur.size;
-//	}
-
-//	newNode.fa = cur.fa;
-//	newNode.size = newNode.size - cur.size;// key disappear 1 
-//	newNode.pos = _last_idx;
-//	newNode.type = cur.type;
-
-//	if (!cmp(son_k, newNode.key[0])) newNode.add(son_k, val);
-//	else cur.add(son_k, val);
-//	
-//	//idx.seekg(cur.right*bits);
-//	//idx.read(reinterpret_cast<char*>(&tmp), sizeof(idxNode));
-//	//newNode.right = cur.right;
-//	//tmp.left = _last_data;
-//	//idx.seekp(tmp.pos*bits);
-//	//idx.write(reinterpret_cast<char*>(&tmp), sizeof(idxNode));
-
-//	//cur.right = _last_data;//newNode pos
-//	//newNode.left = cur.pos;
-//	idx.seekp(cur.pos*bits);
-//	idx.write(reinterpret_cast<char*>(&cur), sizeof(idxNode));
-
-//	idx.seekp(newNode.pos*bits);
-//	idx.write(reinterpret_cast<char*>(&newNode), sizeof(idxNode));
-//	
-//	
-//	_new_key = newNode.key[0];
-//	return newNode.pos;
-//}
-
-
-
-//if  can't find a key there we return bool = 0
-//may be pair iter, bool find
-//// if cant't find cur key, return the next key
-//pair<bool, iterator> pfind(const Key &k, idxNode cur) {
-//	if (empty()) {
-//		dataNode leaf;
-//		return pair<bool, iterator>(0, iterator());
-//	}
-//
-//	int32_t i;
-//	while (true) {
-//		if (cur.type == 1) {// next is leaf
-//			for (i = cur.size - 1; i > 0; --i)
-//				if (!cmp(k, cur.key[i])) break;
-//
-//			dataNode leaf;
-//			read(cur.son[i], leaf);
-//			//way 
-//			for (i = 0; i < leaf.size; ++i)
-//				if (!cmp(k, leaf.key[i]) && !cmp(leaf.key[i], k)) {
-//					return pair<bool, iterator>(1, iterator(this, leaf, i));
-//				}
-//			//way can be optimized by binary search
-//
-//			return pair<bool, iterator>(0, iterator());
-//		}
-//		//type == 0, not the last level idxnode
-//
-//		//way
-//		for (i = cur.size - 1; i > 0; --i)
-//			if (!cmp(k, cur.key[i])) break;
-//
-//		read(cur.son[i], cur);
-//	}
-//
-//}

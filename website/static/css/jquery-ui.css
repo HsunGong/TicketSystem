@@ -195,7 +195,7 @@
 	top: 0;
 	left: 0;
 	cursor: default;
-	max-height: 300px;
+	max-height: 100px;
 	overflow-y: auto;
 	overflow-x: hidden;
 }
@@ -227,9 +227,6 @@
 	border-width: 1px 0 0 0;
 }
 .ui-menu .ui-state-focus,
-.ui-menu .ui-state-active {
-	margin: -1px;
-}
 
 /* icon support */
 .ui-menu-icons {

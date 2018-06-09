@@ -13,6 +13,10 @@ def home_page():
 def search_page():
     return render_template('search.html', page="search");
 
+@app.route('/login', methods = ['get'])
+def user_page():
+    return render_template('user.html', page="login");
+
 @app.route("/search", methods = ['post'])
 def search():
     if request.form['flag'] == '1':
